@@ -10,6 +10,7 @@ class WordMaster {
 
         this.initElements();
         this.initLibrary();
+        this.initTheme();
         this.attachEvents();
         lucide.createIcons();
     }
@@ -44,9 +45,33 @@ class WordMaster {
             speak: document.getElementById('speak-btn'),
             check: document.getElementById('check-btn'),
             next: document.getElementById('next-btn'),
+            next: document.getElementById('next-btn'),
             restart: document.getElementById('restart-btn'),
-            finalRestart: document.getElementById('final-restart-btn')
+            finalRestart: document.getElementById('final-restart-btn'),
+            themeToggle: document.getElementById('theme-toggle')
         };
+    }
+
+    initTheme() {
+        // Load saved theme or default to dark
+        const savedTheme = localStorage.getItem('wordmaster-theme') || 'dark';
+        this.setTheme(savedTheme);
+    }
+
+    setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('wordmaster-theme', theme);
+
+        // Update Icon
+        const iconName = theme === 'light' ? 'moon' : 'sun';
+        this.btns.themeToggle.innerHTML = `<i data-lucide="${iconName}"></i>`;
+        lucide.createIcons();
+    }
+
+    toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        this.setTheme(next);
     }
 
     initLibrary() {
@@ -67,10 +92,13 @@ class WordMaster {
         this.btns.next.onclick = () => this.handleNext();
         this.btns.restart.onclick = () => this.reset();
         this.btns.finalRestart.onclick = () => this.reset();
+        this.btns.themeToggle.onclick = () => this.toggleTheme();
 
 
         // Handle enter key
-        this.inputs.spelling.onkeypress = (e) => { if (e.key === 'Enter') this.handleCheck(); };
+        this.inputs.spelling.onkeypress = (e) => {
+            if (e.key === 'Enter') this.handleCheck();
+        };
         this.inputs.meaning.onkeypress = (e) => { if (e.key === 'Enter') this.handleCheck(); };
     }
 
