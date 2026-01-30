@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordMaster - Interactive Vocabulary Quiz</title>
+    <link rel="stylesheet" href="src/styles/index.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <div id="setup-view" class="card">
+            <h1>WordMaster</h1>
+            <div class="input-group">
+                <label>Select from Library</label>
+                <select id="library-select">
+                    <option value="">Select a Book / Lesson...</option>
+                </select>
+            </div>
+
+            <div id="quiz-mode-selection" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center;">
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="radio" name="quiz-mode" value="spelling-only" checked>
+                    Spelling Only
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="radio" name="quiz-mode" value="both">
+                    Spelling & Meaning
+                </label>
+            </div>
+
+            <div class="input-group">
+                <label>Paste Word List (word: definition)</label>
+                <textarea id="word-paste" rows="8"
+                    placeholder="apple: a red fruit&#10;banana: a yellow long fruit"></textarea>
+            </div>
+
+            <button id="start-btn">
+                <i data-lucide="play"></i>
+                Start Quiz
+            </button>
+        </div>
+
+        <div id="quiz-view" class="card hidden">
+            <div class="quiz-header">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span id="quiz-counter" style="font-weight: bold; min-width: 50px;">1 / 15</span>
+                    <span class="status-badge status-correct"><i data-lucide="check"
+                            style="width: 12px; height: 12px;"></i> <span id="correct-count">0</span></span>
+                    <span class="status-badge status-incorrect"><i data-lucide="x"
+                            style="width: 12px; height: 12px;"></i> <span id="incorrect-count">0</span></span>
+                </div>
+                <button id="restart-btn" class="secondary-btn" style="width: auto; padding: 0.5rem 1rem; margin: 0;">
+                    <i data-lucide="rotate-ccw"></i>
+                </button>
+            </div>
+
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <div class="pronounce-box">
+                <button id="speak-btn" class="speak-btn">
+                    <i data-lucide="volume-2" style="width: 32px; height: 32px;"></i>
+                </button>
+                <span style="color: var(--text-muted); font-size: 0.875rem;">Click to pronounce</span>
+            </div>
+
+            <div class="input-group">
+                <label>Spelling</label>
+                <input type="text" id="spelling-input" autocomplete="off" spellcheck="false"
+                    placeholder="Type the word...">
+            </div>
+
+            <div id="meaning-group" class="input-group">
+                <label>Meaning</label>
+                <textarea id="meaning-input" rows="3" placeholder="What does it mean?"></textarea>
+            </div>
+
+            <div id="control-group">
+                <button id="check-btn">
+                    Verify
+                </button>
+                <button id="next-btn" class="hidden">
+                    Next Word
+                </button>
+            </div>
+
+            <div id="feedback" class="feedback hidden"></div>
+        </div>
+
+        <div id="results-view" class="card hidden">
+            <h1>Quiz Complete!</h1>
+            <div id="score-display"
+                style="text-align: center; font-size: 3rem; margin: 2rem 0; font-weight: 800; color: var(--primary);">
+                85%
+            </div>
+            <div id="stats-detail" style="color: var(--text-muted); text-align: center; margin-bottom: 2rem;">
+                You got 12/15 words correct.
+            </div>
+            <button id="final-restart-btn">
+                <i data-lucide="rotate-ccw"></i>
+                Restart
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="src/app.js"></script>
+</body>
+
+</html>
