@@ -94,12 +94,58 @@ class WordMaster {
         this.btns.finalRestart.onclick = () => this.reset();
         this.btns.themeToggle.onclick = () => this.toggleTheme();
 
+        // Handle quiz mode change
+        const quizModeRadios = document.querySelectorAll('input[name="quiz-mode"]');
+        quizModeRadios.forEach(radio => {
+            radio.onchange = () => this.updatePlaceholder();
+        });
+
+        // Make library and paste mutually exclusive (hide instead of clear)
+        this.inputs.library.onchange = () => {
+            if (this.inputs.library.value) {
+                // Hide paste area when library is selected
+                this.inputs.paste.closest('.input-group').classList.add('hidden');
+            } else {
+                // Show paste area when library is deselected
+                this.inputs.paste.closest('.input-group').classList.remove('hidden');
+            }
+        };
+
+        this.inputs.paste.oninput = () => {
+            if (this.inputs.paste.value.trim()) {
+                // Hide library when user types in paste area
+                this.inputs.library.closest('.input-group').classList.add('hidden');
+            } else {
+                // Show library when paste area is empty
+                this.inputs.library.closest('.input-group').classList.remove('hidden');
+            }
+        };
 
         // Handle enter key
         this.inputs.spelling.onkeypress = (e) => {
             if (e.key === 'Enter') this.handleCheck();
         };
         this.inputs.meaning.onkeypress = (e) => { if (e.key === 'Enter') this.handleCheck(); };
+
+        // Set initial placeholder
+        this.updatePlaceholder();
+    }
+
+    updatePlaceholder() {
+        const mode = document.querySelector('input[name="quiz-mode"]:checked')?.value;
+        const label = document.querySelector('label[for="word-paste"], .input-group label');
+
+        if (mode === 'spelling-only') {
+            this.inputs.paste.placeholder = 'apple\nbanana\norange';
+            if (label && label.textContent.includes('Paste')) {
+                label.textContent = 'Paste Word List (one word per line)';
+            }
+        } else {
+            this.inputs.paste.placeholder = 'apple: a red fruit\nbanana: a yellow long fruit';
+            if (label && label.textContent.includes('Paste')) {
+                label.textContent = 'Paste Word List (word: definition)';
+            }
+        }
     }
 
     startQuiz() {
@@ -200,12 +246,23 @@ class WordMaster {
 
         if (this.state === 'QUIZ') {
             const isSpellingCorrect = verifySpelling(this.inputs.spelling.value, current.word);
+
+            // Format feedback based on quiz mode
+            let correctMsg, incorrectMsg;
+            if (this.quizMode === 'spelling-only') {
+                correctMsg = `Correct! ${current.meaning}`;
+                incorrectMsg = `Incorrect. The word was "${current.word}". ${current.meaning}`;
+            } else {
+                correctMsg = `Correct! ${current.word}: ${current.meaning}`;
+                incorrectMsg = `Incorrect. The word was "${current.word}": ${current.meaning}`;
+            }
+
             if (isSpellingCorrect) {
                 this.score.correct++;
-                this.showFeedback(true, `Correct! ${current.word}: ${current.meaning}`);
+                this.showFeedback(true, correctMsg);
             } else {
                 this.score.incorrect++;
-                this.showFeedback(false, `Incorrect. The word was "${current.word}": ${current.meaning}`);
+                this.showFeedback(false, incorrectMsg);
             }
             this.state = 'FINISHED_WORD';
             this.btns.check.classList.add('hidden');

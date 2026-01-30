@@ -2,7 +2,7 @@
 
 **WordMaster** is a modern, interactive web application designed to help users master vocabulary through spelling, pronunciation, and meaning verification. It provides a clean, distraction-free interface for practicing word lists, specifically tailored for students using curriculums like *Wordly Wise* and *Vocabulary from Classical Roots*.
 
-![Project Screenshot](wordmaster_v1_release.png)
+![WordMaster UI](wordmaster_ui_light.png)
 
 ## Features
 
