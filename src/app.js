@@ -249,12 +249,14 @@ class WordMaster {
 
             // Format feedback based on quiz mode
             let correctMsg, incorrectMsg;
+            const rootInfo = current.root ? ` <br><span style="font-style: italic; color: var(--text-muted); font-size: 0.9em;">Root: ${current.root}</span>` : '';
+
             if (this.quizMode === 'spelling-only') {
-                correctMsg = `Correct! ${current.meaning}`;
-                incorrectMsg = `Incorrect. The word was "${current.word}". ${current.meaning}`;
+                correctMsg = `Correct! ${current.meaning}${rootInfo}`;
+                incorrectMsg = `Incorrect. The word was "${current.word}". ${current.meaning}${rootInfo}`;
             } else {
-                correctMsg = `Correct! ${current.word}: ${current.meaning}`;
-                incorrectMsg = `Incorrect. The word was "${current.word}": ${current.meaning}`;
+                correctMsg = `Correct! ${current.word}: ${current.meaning}${rootInfo}`;
+                incorrectMsg = `Incorrect. The word was "${current.word}": ${current.meaning}${rootInfo}`;
             }
 
             if (isSpellingCorrect) {
@@ -281,7 +283,7 @@ class WordMaster {
 
     showFeedback(isSuccess, message) {
         const f = this.displays.feedback;
-        f.textContent = message;
+        f.innerHTML = message;
         f.className = `feedback ${isSuccess ? 'status-correct' : 'status-incorrect'}`;
         f.classList.remove('hidden');
     }
