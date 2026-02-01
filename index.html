@@ -16,6 +16,14 @@
                 <i data-lucide="sun"></i>
             </button>
             <h1>WordMaster</h1>
+
+            <div id="mastery-stats"
+                style="text-align: center; margin-bottom: 2rem; padding: 1rem; background: var(--bg); border-radius: 12px; border: 1px solid var(--border);">
+                <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.25rem;">Total Mastered Words
+                </div>
+                <div id="total-mastered" style="font-size: 1.5rem; font-weight: 700; color: var(--success);">0</div>
+            </div>
+
             <div class="input-group">
                 <label>Select from Library</label>
                 <select id="library-select">
@@ -40,10 +48,17 @@
                     placeholder="apple: a red fruit&#10;banana: a yellow long fruit"></textarea>
             </div>
 
-            <button id="start-btn">
-                <i data-lucide="play"></i>
-                Start Quiz
-            </button>
+            <div style="display: flex; gap: 1rem;">
+                <button id="start-btn" style="flex: 2;">
+                    <i data-lucide="play"></i>
+                    Start Quiz
+                </button>
+                <button id="review-btn" class="secondary-btn"
+                    style="flex: 1; background: var(--bg); border: 1px solid var(--primary); color: var(--primary);">
+                    <i data-lucide="book-open"></i>
+                    Review Incorrect
+                </button>
+            </div>
         </div>
 
         <div id="quiz-view" class="card hidden">

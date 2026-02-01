@@ -70,6 +70,22 @@ body {
   backdrop-filter: blur(12px);
 }
 
+@media (max-width: 600px) {
+  .card {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  body {
+    padding: 1rem;
+  }
+}
+
 /* ===== Typography ===== */
 h1 {
   font-size: 2rem;
@@ -302,7 +318,36 @@ button:active {
 }
 
 .speak-btn:hover {
-  transform: scale(1.05);
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--shadow-hover);
+}
+
+.speak-btn.speaking {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.speak-btn i {
+  width: 32px;
+  height: 32px;
+  color: #ffffff;
 }
 
 /* ===== Status Badges ===== */
