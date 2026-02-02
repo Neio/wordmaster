@@ -513,4 +513,6 @@ class WordMaster {
 }
 
 // Start the app
-window.onload = () => new WordMaster();
+window.onload = () => {
+    window.app = new WordMaster();
+};
