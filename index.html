@@ -15,6 +15,9 @@
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">
                 <i data-lucide="sun"></i>
             </button>
+            <button id="settings-btn" class="theme-toggle" aria-label="Settings" style="right: 5rem;">
+                <i data-lucide="settings"></i>
+            </button>
             <h1>WordMaster</h1>
 
             <div id="mastery-stats"
@@ -119,6 +122,30 @@
                 You got 12/15 words correct.
             </div>
             <button id="final-restart-btn" class="secondary-btn"><i data-lucide="refresh-cw"></i> Restart Quiz</button>
+        </div>
+
+        <div id="settings-view" class="card hidden">
+            <h1>Settings</h1>
+
+            <div class="input-group">
+                <label>Voice Selection</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="voice-select" style="flex: 1;">
+                        <option value="">System Default</option>
+                    </select>
+                    <button id="preview-voice-btn" style="width: auto; padding: 0.875rem 1rem;"
+                        aria-label="Preview Voice">
+                        <i data-lucide="play" style="width: 20px; height: 20px;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button id="save-settings-btn">
+                    <i data-lucide="save"></i>
+                    Save & Back
+                </button>
+            </div>
         </div>
 
         <footer class="copyright-footer">

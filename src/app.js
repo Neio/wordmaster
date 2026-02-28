@@ -11,8 +11,10 @@ class WordMaster {
         this.initElements();
         this.initLibrary();
         this.initTheme();
+        this.initVoices();
         this.attachEvents();
         lucide.createIcons();
+        document.querySelectorAll('svg[data-lucide]').forEach(svg => svg.removeAttribute('data-lucide'));
 
         // Initialize persistence
         this.masteredWords = new Set(JSON.parse(localStorage.getItem('wordmaster-mastered') || '[]'));
@@ -50,7 +52,8 @@ class WordMaster {
         this.views = {
             setup: document.getElementById('setup-view'),
             quiz: document.getElementById('quiz-view'),
-            results: document.getElementById('results-view')
+            results: document.getElementById('results-view'),
+            settings: document.getElementById('settings-view')
         };
 
         this.inputs = {
@@ -58,7 +61,8 @@ class WordMaster {
             paste: document.getElementById('word-paste'),
             spelling: document.getElementById('spelling-input'),
             meaning: document.getElementById('meaning-input'),
-            meaningGroup: document.getElementById('meaning-group')
+            meaningGroup: document.getElementById('meaning-group'),
+            voiceSelect: document.getElementById('voice-select')
         };
 
         this.displays = {
@@ -80,7 +84,10 @@ class WordMaster {
             restart: document.getElementById('restart-btn'),
             finalRestart: document.getElementById('final-restart-btn'),
             startReview: document.getElementById('review-btn'),
-            themeToggle: document.getElementById('theme-toggle')
+            themeToggle: document.getElementById('theme-toggle'),
+            settings: document.getElementById('settings-btn'),
+            saveSettings: document.getElementById('save-settings-btn'),
+            previewVoice: document.getElementById('preview-voice-btn')
         };
     }
 
@@ -98,6 +105,36 @@ class WordMaster {
         const iconName = theme === 'light' ? 'moon' : 'sun';
         this.btns.themeToggle.innerHTML = `<i data-lucide="${iconName}"></i>`;
         lucide.createIcons();
+        document.querySelectorAll('svg[data-lucide]').forEach(svg => svg.removeAttribute('data-lucide'));
+    }
+
+    initVoices() {
+        this.voices = [];
+        this.selectedVoiceURI = localStorage.getItem('wordmaster-voice-uri') || '';
+
+        const populateVoices = () => {
+            this.voices = window.speechSynthesis.getVoices().filter(voice => {
+                const lang = voice.lang.replace('_', '-');
+                return lang.startsWith('en-US') || lang.startsWith('en-GB');
+            });
+            // preserve the "System Default" option
+            this.inputs.voiceSelect.innerHTML = '<option value="">System Default</option>';
+
+            this.voices.forEach(voice => {
+                const opt = document.createElement('option');
+                opt.value = voice.voiceURI;
+                opt.textContent = `${voice.name} (${voice.lang})`;
+                if (voice.voiceURI === this.selectedVoiceURI) {
+                    opt.selected = true;
+                }
+                this.inputs.voiceSelect.appendChild(opt);
+            });
+        };
+
+        populateVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = populateVoices;
+        }
     }
 
     toggleTheme() {
@@ -126,6 +163,9 @@ class WordMaster {
         this.btns.restart.onclick = () => this.reset();
         this.btns.finalRestart.onclick = () => this.reset();
         this.btns.themeToggle.onclick = () => this.toggleTheme();
+        this.btns.settings.onclick = () => this.showView('settings');
+        this.btns.saveSettings.onclick = () => this.saveSettings();
+        this.btns.previewVoice.onclick = () => this.previewVoice();
 
         const quizModeRadios = document.querySelectorAll('input[name="quiz-mode"]');
         quizModeRadios.forEach(radio => {
@@ -209,6 +249,32 @@ class WordMaster {
         localStorage.setItem('wordmaster-mastered', JSON.stringify([...this.masteredWords]));
         localStorage.setItem('wordmaster-incorrect', JSON.stringify(this.incorrectWords));
         this.updateMasteryUI();
+    }
+
+    saveSettings() {
+        const selectedURI = this.inputs.voiceSelect.value;
+        this.selectedVoiceURI = selectedURI;
+        localStorage.setItem('wordmaster-voice-uri', selectedURI);
+        this.showView('setup');
+    }
+
+    previewVoice() {
+        const selectedURI = this.inputs.voiceSelect.value;
+        const utterance = new SpeechSynthesisUtterance("Apple, a round fruit with red or green skin and a whitish interior.");
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+
+        if (selectedURI) {
+            const selectedVoice = this.voices.find(v => v.voiceURI === selectedURI);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+                utterance.lang = selectedVoice.lang;
+            }
+        }
+
+        window.speechSynthesis.cancel();
+        window.currentUtterance = utterance; // Prevent GC in Safari
+        window.speechSynthesis.speak(utterance);
     }
 
     getIncorrectCountForBook(book, chapter) {
@@ -405,11 +471,21 @@ class WordMaster {
         utterance.lang = 'en-US';
         utterance.rate = 0.9; // Slightly slower for clarity
 
+        if (this.selectedVoiceURI) {
+            const selectedVoice = this.voices.find(v => v.voiceURI === this.selectedVoiceURI);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+                utterance.lang = selectedVoice.lang;
+            }
+        }
+
         // visual feedback
         this.btns.speak.classList.add('speaking');
         utterance.onend = () => this.btns.speak.classList.remove('speaking');
+        utterance.onerror = () => this.btns.speak.classList.remove('speaking');
 
         window.speechSynthesis.cancel(); // Cancel any current speech
+        window.currentUtterance = utterance; // Prevent GC in Safari
         window.speechSynthesis.speak(utterance);
     }
 

@@ -25,7 +25,8 @@
 
 ## Getting Started
 
-Since WordMaster uses ES Modules, it requires a local server to run (it cannot be run directly via `file://`).
+> [!WARNING]
+> **Important:** WordMaster must be served via a local web server (e.g., `http://localhost:8000`). If you open `index.html` directly in your browser using the `file://` protocol, **the UI icons will be missing** and the app will not function correctly due to strict CORS security policies blocking the ES Modules.
 
 ### Prerequisites
 

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><script src="https://unpkg.com/lucide@latest"></script></head>
+<body>
+    <button id="preview-voice-btn" style="width: auto; padding: 0.875rem 1rem;" aria-label="Preview Voice">
+        <i data-lucide="play" style="width: 20px; height: 20px;"></i>
+    </button>
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('svg[data-lucide]').forEach(svg => svg.removeAttribute('data-lucide'));
+        console.log("BODY AFTER:", document.body.innerHTML);
+    </script>
+</body>
+</html>

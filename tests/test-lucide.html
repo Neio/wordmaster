@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">
+        <i data-lucide="sun"></i>
+    </button>
+    <button id="settings-btn" class="theme-toggle" aria-label="Settings" style="right: 5rem;">
+        <i data-lucide="settings"></i>
+    </button>
+    <script>
+        lucide.createIcons();
+        document.querySelectorAll('svg[data-lucide]').forEach(svg => svg.removeAttribute('data-lucide'));
+
+        // simulate theme toggle which currently does:
+        const themeBtn = document.getElementById('theme-toggle');
+        // this.btns.themeToggle.innerHTML = `<i data-lucide="${iconName}"></i>`;
+        // lucide.createIcons();
+        // document.querySelectorAll('svg[data-lucide]').forEach(svg => svg.removeAttribute('data-lucide'));
+
+        console.log("Before theme toggle:", document.body.innerHTML);
+        themeBtn.innerHTML = `<i data-lucide="moon"></i>`;
+        
+        lucide.createIcons();
+        document.querySelectorAll('svg[data-lucide]').forEach(svg => svg.removeAttribute('data-lucide'));
+        console.log("After theme toggle:", document.body.innerHTML);
+    </script>
+</body>
+</html>
