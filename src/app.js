@@ -497,6 +497,8 @@ class WordMaster {
 
             // Format feedback based on quiz mode
             let correctMsg, incorrectMsg;
+            // Prefer real dictionary definition; fall back to hand-authored meaning
+            const displayDef = current.definition || current.meaning;
             // Improved visibility: block display, standard text color, slightly larger
             const rootInfo = current.root ?
                 `<div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); color: var(--text); font-size: 0.95em;">
@@ -504,11 +506,11 @@ class WordMaster {
                 </div>` : '';
 
             if (this.quizMode === 'spelling-only') {
-                correctMsg = `Correct! ${current.meaning}${rootInfo} `;
-                incorrectMsg = `Incorrect.The word was "${current.word}".${current.meaning}${rootInfo} `;
+                correctMsg = `Correct! ${displayDef}${rootInfo} `;
+                incorrectMsg = `Incorrect. The word was "${current.word}". ${displayDef}${rootInfo} `;
             } else {
-                correctMsg = `Correct! ${current.word}: ${current.meaning}${rootInfo} `;
-                incorrectMsg = `Incorrect.The word was "${current.word}": ${current.meaning}${rootInfo} `;
+                correctMsg = `Correct! ${current.word}: ${displayDef}${rootInfo} `;
+                incorrectMsg = `Incorrect. The word was "${current.word}": ${displayDef}${rootInfo} `;
             }
 
             if (isSpellingCorrect) {
