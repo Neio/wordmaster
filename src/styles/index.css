@@ -451,3 +451,34 @@ button:active {
 .card {
   animation: fadeIn 0.4s ease-out;
 }
+
+/* ===== Empty Input Shake ===== */
+@keyframes inputShake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px);
+  }
+
+  40% {
+    transform: translateX(6px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.input-shake {
+  animation: inputShake 0.35s ease;
+  border-color: var(--error) !important;
+  box-shadow: 0 0 0 3px rgba(200, 90, 84, 0.2) !important;
+}
