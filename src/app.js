@@ -1,5 +1,5 @@
-import { wordlyLibrary } from './data/library.js?v=e5da0d2';
-import { verifySpelling, isMeaningCorrect } from './utils/VerificationLogic.js?v=e5da0d2';
+import { wordlyLibrary } from './data/library.js?v=202602280006';
+import { verifySpelling, isMeaningCorrect } from './utils/VerificationLogic.js?v=202602280006';
 
 class WordMaster {
     constructor() {
