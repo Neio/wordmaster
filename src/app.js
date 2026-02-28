@@ -493,6 +493,15 @@ class WordMaster {
         const current = this.words[this.currentIndex];
 
         if (this.state === 'QUIZ') {
+            // Block submission if spelling field is empty
+            if (!this.inputs.spelling.value.trim()) {
+                this.inputs.spelling.classList.add('input-shake');
+                this.inputs.spelling.addEventListener('animationend', () => {
+                    this.inputs.spelling.classList.remove('input-shake');
+                }, { once: true });
+                return;
+            }
+
             const isSpellingCorrect = verifySpelling(this.inputs.spelling.value, current.word);
 
             // Format feedback based on quiz mode
