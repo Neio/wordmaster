@@ -35,6 +35,11 @@ const TESTS = {
         id: '7.2',
         name: 'SRS Review Due Flow Updates Count',
         description: 'Due count should drop to 0 after reviewing due items'
+    },
+    srsCurveUpdate: {
+        id: '7.3',
+        name: 'SRS Memory Curve Updates State',
+        description: 'Correct answer should advance reps, interval, and ease'
     }
 };
 
@@ -329,6 +334,45 @@ async function runTests() {
     } catch (error) {
         console.error(`   ❌ ERROR: ${error.message}\n`);
         results.push({ test: TESTS.srsReviewFlow.name, passed: false, error: error.message });
+    }
+
+    // Test 6: SRS Memory Curve Updates State
+    try {
+        console.log(`📋 Test ${TESTS.srsCurveUpdate.id}: ${TESTS.srsCurveUpdate.name}`);
+        await clearStorageAndReload(page);
+
+        const data = await seedSrsDue(page, 1);
+
+        await page.click('#review-due-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+
+        const word = await page.evaluate(() => {
+            const app = window.app;
+            return app.words[app.currentIndex].word;
+        });
+        await page.fill('#spelling-input', word);
+        await page.press('#spelling-input', 'Enter');
+
+        await page.waitForSelector('#results-view:not(.hidden)');
+
+        const srsEntry = await page.evaluate(({ data }) => {
+            const raw = localStorage.getItem('wordmaster-srs-v1');
+            const parsed = raw ? JSON.parse(raw) : {};
+            const key = `${data.book}|${data.chapter}|${data.words[0]}`;
+            return parsed[key];
+        }, { data });
+
+        const passed = srsEntry &&
+            srsEntry.reps === 2 &&
+            srsEntry.intervalDays === 6 &&
+            Math.abs(srsEntry.ease - 2.6) < 0.0001;
+
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: SRS state updated (reps: ${srsEntry?.reps}, interval: ${srsEntry?.intervalDays}, ease: ${srsEntry?.ease})\n`);
+
+        results.push({ test: TESTS.srsCurveUpdate.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsCurveUpdate.name, passed: false, error: error.message });
     }
 
     // Summary
