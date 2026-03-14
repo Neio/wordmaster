@@ -68,9 +68,7 @@ class WordMaster {
             spelling: document.getElementById('spelling-input'),
             meaning: document.getElementById('meaning-input'),
             meaningGroup: document.getElementById('meaning-group'),
-            voiceSelect: document.getElementById('voice-select'),
-            reviewWordsContainer: document.getElementById('review-words-container'),
-            reviewListSubtitle: document.getElementById('review-list-subtitle')
+            voiceSelect: document.getElementById('voice-select')
         };
 
         this.displays = {
@@ -81,7 +79,9 @@ class WordMaster {
             feedback: document.getElementById('feedback'),
             score: document.getElementById('score-display'),
             stats: document.getElementById('stats-detail'),
-            setupNotice: document.getElementById('setup-notice')
+            setupNotice: document.getElementById('setup-notice'),
+            reviewWordsContainer: document.getElementById('review-words-container'),
+            reviewListSubtitle: document.getElementById('review-list-subtitle')
         };
 
         this.btns = {
@@ -475,8 +475,8 @@ class WordMaster {
     }
 
     renderReviewList(isFallback) {
-        const container = this.inputs.reviewWordsContainer;
-        const subtitle = this.inputs.reviewListSubtitle;
+        const container = this.displays.reviewWordsContainer;
+        const subtitle = this.displays.reviewListSubtitle;
         const startBtn = this.btns.startReviewAction;
 
         container.innerHTML = '';
@@ -727,8 +727,8 @@ class WordMaster {
                 if (book && chapter) {
                     this.incorrectWords.push({
                         word: current.word,
-                        book: book,
-                        chapter: chapter
+                        book,
+                        chapter
                     });
                 }
 
