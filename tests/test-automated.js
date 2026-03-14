@@ -25,6 +25,16 @@ const TESTS = {
         id: '5.6',
         name: 'Correctly Answered Words Removed from Incorrect List',
         description: 'Words corrected in review mode should be removed'
+    },
+    srsButtonHidden: {
+        id: '7.1',
+        name: 'SRS Review Due Button Hidden When No Due',
+        description: 'Review Due should be hidden if no due items exist'
+    },
+    srsReviewFlow: {
+        id: '7.2',
+        name: 'SRS Review Due Flow Updates Count',
+        description: 'Due count should drop to 0 after reviewing due items'
     }
 };
 
@@ -44,11 +54,24 @@ async function runTests() {
             const resultsVisible = await page.locator('#results-view').isVisible();
             if (resultsVisible) break;
 
+            // If next button is visible, advance to next word
+            if (await page.locator('#next-btn:not(.hidden)').isVisible()) {
+                await page.locator('#next-btn:not(.hidden)').click();
+                await page.waitForTimeout(200);
+                continue;
+            }
+
             const inputVisible = await page.locator('#spelling-input').isVisible();
             if (!inputVisible) {
                 // Wait a bit and check results again
                 await page.waitForTimeout(500);
                 if (await page.locator('#results-view').isVisible()) break;
+                continue;
+            }
+
+            const inputEnabled = await page.locator('#spelling-input').isEnabled();
+            if (!inputEnabled) {
+                await page.waitForTimeout(200);
                 continue;
             }
 
@@ -80,10 +103,55 @@ async function runTests() {
         }
     }
 
+    async function clearStorageAndReload(page) {
+        await page.goto(BASE_URL);
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.evaluate(() => localStorage.clear());
+        await page.reload();
+        await page.waitForSelector('#setup-view:not(.hidden)');
+    }
+
+    async function seedSrsDue(page, dueCount = 2) {
+        await page.selectOption('#library-select', { index: 1 });
+        await page.click('#start-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+
+        const data = await page.evaluate((count) => {
+            const app = window.app;
+            const words = app.words.slice(0, count).map(w => w.word);
+            return { book: app.currentBook, chapter: app.currentChapter, words };
+        }, dueCount);
+
+        const now = Date.now();
+        await page.evaluate(({ data, now }) => {
+            const srs = {};
+            data.words.forEach(word => {
+                const key = `${data.book}|${data.chapter}|${word}`;
+                srs[key] = {
+                    reps: 1,
+                    intervalDays: 1,
+                    ease: 2.5,
+                    lastReviewed: now - 86400000,
+                    nextDue: now - 1000
+                };
+            });
+            localStorage.setItem('wordmaster-srs-v1', JSON.stringify(srs));
+            localStorage.setItem('wordmaster-srs-seeded', '1');
+        }, { data, now });
+
+        await page.click('#restart-btn');
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.reload();
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.selectOption('#library-select', { index: 1 });
+
+        return data;
+    }
+
     // Test 1: Feedback Persistence Bug Fix
     try {
         console.log(`📋 Test ${TESTS.feedbackPersistence.id}: ${TESTS.feedbackPersistence.name}`);
-        await page.goto(BASE_URL);
+        await clearStorageAndReload(page);
 
         // Start quiz with paste method
         await page.fill('#word-paste', 'apple\nbanana\ncarrot');
@@ -125,7 +193,7 @@ async function runTests() {
     // Note: Review button relies on Library mode
     try {
         console.log(`📋 Test ${TESTS.reviewButtonPersistence.id}: ${TESTS.reviewButtonPersistence.name}`);
-        await page.goto(BASE_URL);
+        await clearStorageAndReload(page);
 
         // Start with library
         await page.selectOption('#library-select', { index: 1 }); // Select first book
@@ -215,6 +283,55 @@ async function runTests() {
     } catch (error) {
         console.error(`   ❌ ERROR: ${error.message}\n`);
         results.push({ test: TESTS.incorrectWordRemoval.name, passed: false, error: error.message });
+    }
+
+    // Test 4: SRS Review Due Button Hidden When No Due
+    try {
+        console.log(`📋 Test ${TESTS.srsButtonHidden.id}: ${TESTS.srsButtonHidden.name}`);
+        await clearStorageAndReload(page);
+
+        await page.selectOption('#library-select', { index: 1 });
+        await page.waitForSelector('#review-due-btn', { state: 'attached' });
+        const dueVisible = await page.locator('#review-due-btn').isVisible();
+
+        const passed = dueVisible === false;
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review Due hidden (visible: ${dueVisible})\n`);
+
+        results.push({ test: TESTS.srsButtonHidden.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsButtonHidden.name, passed: false, error: error.message });
+    }
+
+    // Test 5: SRS Review Due Flow Updates Count
+    try {
+        console.log(`📋 Test ${TESTS.srsReviewFlow.id}: ${TESTS.srsReviewFlow.name}`);
+        await clearStorageAndReload(page);
+
+        await seedSrsDue(page, 2);
+
+        await page.waitForSelector('#review-due-btn:not(.hidden)');
+        const dueButtonText = await page.locator('#review-due-btn').textContent();
+        const dueCountMatch = dueButtonText.match(/\((\d+)\)/);
+        const dueCount = dueCountMatch ? parseInt(dueCountMatch[1]) : -1;
+
+        await page.click('#review-due-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+        await finishQuiz(page, true);
+
+        await page.waitForSelector('#results-view:not(.hidden)');
+        await page.click('#final-restart-btn');
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.selectOption('#library-select', { index: 1 });
+
+        const dueVisibleAfter = await page.locator('#review-due-btn').isVisible();
+        const passed = dueCount === 2 && dueVisibleAfter === false;
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Due count used and cleared (initial: ${dueCount}, visible after: ${dueVisibleAfter})\n`);
+
+        results.push({ test: TESTS.srsReviewFlow.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsReviewFlow.name, passed: false, error: error.message });
     }
 
     // Summary

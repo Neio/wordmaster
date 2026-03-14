@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordMaster - Interactive Vocabulary Quiz</title>
-    <link rel="stylesheet" href="src/styles/index.css?v=202602280006">
+    <link rel="stylesheet" href="src/styles/index.css?v=202603130001">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
@@ -51,13 +51,18 @@
                     placeholder="apple: a red fruit&#10;banana: a yellow long fruit"></textarea>
             </div>
 
-            <div style="display: flex; gap: 1rem;">
-                <button id="start-btn" style="flex: 2;">
+            <div class="setup-actions">
+                <button id="start-btn">
                     <i data-lucide="play"></i>
                     Start Quiz
                 </button>
+                <button id="review-due-btn" class="secondary-btn"
+                    style="background: var(--bg); border: 1px solid var(--primary); color: var(--primary);">
+                    <i data-lucide="clock"></i>
+                    Review Due
+                </button>
                 <button id="review-btn" class="secondary-btn"
-                    style="flex: 1; background: var(--bg); border: 1px solid var(--primary); color: var(--primary);">
+                    style="background: var(--bg); border: 1px solid var(--primary); color: var(--primary);">
                     <i data-lucide="book-open"></i>
                     Review Incorrect
                 </button>
@@ -150,11 +155,11 @@
 
         <footer class="copyright-footer">
             &copy; 2026 Neio Zhou. All rights reserved.
-            <span style="margin-left: 1rem; opacity: 0.4; font-size: 0.75em;">v 202602280006</span>
+            <span style="margin-left: 1rem; opacity: 0.4; font-size: 0.75em;">v 202603130001</span>
         </footer>
     </div>
 
-    <script type="module" src="src/app.js?v=202602280006"></script>
+    <script type="module" src="src/app.js?v=202603130001"></script>
 </body>
 
 </html>

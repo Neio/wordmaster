@@ -436,6 +436,18 @@ button:active {
   display: none;
 }
 
+.setup-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .setup-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
