@@ -287,17 +287,17 @@ Use this abbreviated list to quickly verify no regressions:
 ### 7. Spaced Repetition (SRS)
 
 #### 7.1. Button Visibility
-- [ ] Select library book with 0 due items → Verify "Review Due" button is HIDDEN
-- [ ] Mock some words as due in localStorage (`wordmaster-srs-v1`)
-- [ ] Reload page, select book → Verify "Review Due (N)" button is VISIBLE
-- [ ] Verify count correctly reflects due items
+- [ ] Select library book with 0 due items → Verify "Review" button is VISIBLE
+- [ ] Clear SRS data → Verify "Review" button is VISIBLE
+- [ ] Verify button text is simply "Review"
 
-#### 7.2. Review Due Flow
-- [ ] Start "Review Due" session
-- [ ] Verify words are presented in due order
+#### 7.2. Review Flow
+- [ ] Mock some words as due in localStorage (`wordmaster-srs-v1`)
+- [ ] Click "Review" button → Verify Review List view is shown with correct words
+- [ ] Click "Start Review" → Verify quiz starts
 - [ ] Complete session by answering all words correctly
 - [ ] Return to setup screen
-- [ ] Verify "Review Due" button is HIDDEN (all reviewed)
+- [ ] Click "Review" → Verify fallback list (due soonest) is shown if nothing is due
 
 #### 7.3. SRS State Updates (Memory Curve)
 - [ ] Verify SRS state in localStorage (`wordmaster-srs-v1`):

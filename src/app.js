@@ -155,12 +155,18 @@ class WordMaster {
     }
 
     initLibrary() {
+        this.wordMap = new Map();
         for (const book in wordlyLibrary) {
             for (const chapter in wordlyLibrary[book]) {
                 const opt = document.createElement('option');
                 opt.value = `${book}|${chapter}`;
                 opt.textContent = `${book} - ${chapter} `;
                 this.inputs.library.appendChild(opt);
+
+                for (const item of wordlyLibrary[book][chapter]) {
+                    const key = makeSrsKey(book, chapter, item.word);
+                    this.wordMap.set(key, item);
+                }
             }
         }
     }
@@ -229,7 +235,7 @@ class WordMaster {
                 // Show paste area when library is deselected
                 this.inputs.paste.closest('.input-group').classList.remove('hidden');
                 this.btns.startReview.classList.add('hidden'); // Hide review button when no book selected
-                this.btns.startReviewDue.classList.add('hidden'); // Hide due review button when no book selected
+                this.updateReviewButtons();
             }
         };
 
@@ -338,12 +344,13 @@ class WordMaster {
         const now = Date.now();
         return Object.entries(this.srsData)
             .map(([key, entry]) => {
-                const [book, chapter, word] = key.split('|');
-                const wordObj = wordlyLibrary[book]?.[chapter]?.find(w => w.word === word);
+                const wordObj = this.wordMap.get(key);
+                if (!wordObj) return null;
+                const [book, chapter] = key.split('|');
                 return { item: wordObj, entry, book, chapter };
             })
-            .filter(({ item, entry }) => item && entry && entry.nextDue <= now)
-            .sort((a, b) => (a.entry.nextDue || 0) - (b.entry.nextDue || 0))
+            .filter(mapped => mapped && mapped.entry.nextDue <= now)
+            .sort((a, b) => a.entry.nextDue - b.entry.nextDue)
             .map(({ item, book, chapter }) => ({ ...item, book, chapter }));
     }
 
@@ -351,12 +358,13 @@ class WordMaster {
         const now = Date.now();
         return Object.entries(this.srsData)
             .map(([key, entry]) => {
-                const [book, chapter, word] = key.split('|');
-                const wordObj = wordlyLibrary[book]?.[chapter]?.find(w => w.word === word);
+                const wordObj = this.wordMap.get(key);
+                if (!wordObj) return null;
+                const [book, chapter] = key.split('|');
                 return { item: wordObj, entry, book, chapter };
             })
-            .filter(({ item, entry }) => item && entry && entry.nextDue > now)
-            .sort((a, b) => (a.entry.nextDue || 0) - (b.entry.nextDue || 0))
+            .filter(mapped => mapped && mapped.entry.nextDue > now)
+            .sort((a, b) => a.entry.nextDue - b.entry.nextDue)
             .slice(0, count)
             .map(({ item, book, chapter }) => ({ ...item, book, chapter }));
     }
@@ -544,7 +552,7 @@ class WordMaster {
 
     startQuizCommon() {
         if (!this.words || this.words.length === 0) return;
-        // this.clearSetupNotice();
+        this.clearSetupNotice();
 
         // Clear any previous feedback state at quiz start
         this.displays.feedback.classList.add('hidden');
