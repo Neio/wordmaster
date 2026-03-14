@@ -28,7 +28,7 @@ export const computeNextSrs = (state, quality, nowMs) => {
         } else if (reps === 2) {
             intervalDays = 6;
         } else {
-            intervalDays = Math.round(prevInterval * ease);
+            intervalDays = Math.round(prevInterval * prevEase);
         }
     }
 

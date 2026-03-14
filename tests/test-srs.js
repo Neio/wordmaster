@@ -22,7 +22,7 @@ async function run() {
 
     state = computeNextSrs(state, 5, now);
     assert.strictEqual(state.reps, 3);
-    assert.strictEqual(state.intervalDays, 17);
+    assert.strictEqual(state.intervalDays, 16);
 
     // Incorrect reset and ease floor.
     const incorrect = computeNextSrs({ reps: 3, intervalDays: 10, ease: 1.3 }, 2, now);

@@ -12,7 +12,7 @@
 ### Spaced Repetition (SRS) Review Mode (`abf761a`)
 - Added a new "Review" mode using a simplified SM-2 algorithm.
 - Items are scheduled based on performance (Correct: quality 5, Incorrect: quality 2).
-- Ease factor and intervals (1, 6, 17+ days) update dynamically to optimize long-term retention.
+- Ease factor and intervals (1, 6, 16+ days) update dynamically to optimize long-term retention.
 - "Review" button is always available on the setup screen and pulls words from the entire library.
 - **Review List Preview**: Clicking "Review" now shows an intermediate list of words (due or soonest) before starting the quiz.
 - **Due Soon Fallback**: If no words are due, the system automatically loads the 15 words due soonest.

@@ -32,7 +32,7 @@ Interval update:
   - `reps += 1`
   - `reps == 1` => `intervalDays = 1`
   - `reps == 2` => `intervalDays = 6`
-  - `reps >= 3` => `intervalDays = round(prevInterval * ease)`
+  - `reps >= 3` => `intervalDays = round(prevInterval * prevEase)`
 
 `nextDue = now + intervalDays * 86400000`
 
