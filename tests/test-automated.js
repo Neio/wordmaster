@@ -245,11 +245,8 @@ async function runTests() {
         await page.fill('#spelling-input', word);
         await page.press('#spelling-input', 'Enter');
 
-        // Wait for correct feedback (optional) but ensure we move on
-        // Usually correct auto-advances or shows next? 
-        // In app.js handleCheck: if correct -> showFeedback -> setTimeout(nextWord, 1500) if spelling-only?
-        // Let's assume spelling-only mode auto-advances or we wait
-        await page.waitForTimeout(2000);
+        // Wait until input re-enabled or Next appears
+        await page.waitForSelector('#next-btn:not(.hidden), #spelling-input:enabled, #results-view:not(.hidden)');
 
         // If still on input, click next (if button visible)
         if (await page.locator('#next-btn:not(.hidden)').isVisible()) {

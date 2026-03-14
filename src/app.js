@@ -77,7 +77,8 @@ class WordMaster {
             progress: document.getElementById('progress-fill'),
             feedback: document.getElementById('feedback'),
             score: document.getElementById('score-display'),
-            stats: document.getElementById('stats-detail')
+            stats: document.getElementById('stats-detail'),
+            setupNotice: document.getElementById('setup-notice')
         };
 
         this.btns = {
@@ -253,6 +254,20 @@ class WordMaster {
         }
     }
 
+    showSetupNotice(message, isError = true) {
+        if (!this.displays.setupNotice) return;
+        this.displays.setupNotice.textContent = message;
+        this.displays.setupNotice.classList.remove('hidden');
+        this.displays.setupNotice.classList.toggle('error', isError);
+    }
+
+    clearSetupNotice() {
+        if (!this.displays.setupNotice) return;
+        this.displays.setupNotice.textContent = '';
+        this.displays.setupNotice.classList.add('hidden');
+        this.displays.setupNotice.classList.remove('error');
+    }
+
     saveProgress() {
         localStorage.setItem('wordmaster-mastered', JSON.stringify([...this.masteredWords]));
         localStorage.setItem('wordmaster-incorrect', JSON.stringify(this.incorrectWords));
@@ -396,24 +411,24 @@ class WordMaster {
     startReviewQuiz() {
         const libVal = this.inputs.library.value;
         if (!libVal) {
-            alert("Please select a library item first.");
+            this.showSetupNotice("Please select a library item first.");
             return;
         }
 
         const [book, chapter] = libVal.split('|');
-        const wrongWords = this.incorrectWords.filter(item =>
-            item.book === book && item.chapter === chapter
+        const wrongWordSet = new Set(
+            this.incorrectWords
+                .filter(item => item.book === book && item.chapter === chapter)
+                .map(item => item.word)
         );
 
-        if (wrongWords.length === 0) {
-            alert("Great job! No incorrect words for this lesson.");
+        if (wrongWordSet.size === 0) {
+            this.showSetupNotice("Great job! No incorrect words for this lesson.", false);
             return;
         }
 
         // Load full word objects from library
-        const fullWords = wordlyLibrary[book][chapter].filter(w =>
-            wrongWords.some(item => item.word === w.word)
-        );
+        const fullWords = wordlyLibrary[book][chapter].filter(w => wrongWordSet.has(w.word));
 
         this.words = [...fullWords].sort(() => Math.random() - 0.5);
         this.currentBook = book;
@@ -425,7 +440,7 @@ class WordMaster {
     startSrsReviewQuiz() {
         const libVal = this.inputs.library.value;
         if (!libVal) {
-            alert("Please select a library item first.");
+            this.showSetupNotice("Please select a library item first.");
             return;
         }
 
@@ -433,7 +448,7 @@ class WordMaster {
         const dueWords = this.getSrsDueForBook(book, chapter);
 
         if (dueWords.length === 0) {
-            alert("No words are due for review yet.");
+            this.showSetupNotice("No words are due for review yet.", false);
             return;
         }
 
@@ -481,7 +496,7 @@ class WordMaster {
         }
 
         if (selectedList.length === 0) {
-            alert("Please select or enter some words first!");
+            this.showSetupNotice("Please select or enter some words first!");
             return;
         }
 
@@ -492,6 +507,7 @@ class WordMaster {
 
     startQuizCommon() {
         if (!this.words || this.words.length === 0) return;
+        this.clearSetupNotice();
 
         // Clear any previous feedback state at quiz start
         this.displays.feedback.classList.add('hidden');
@@ -713,6 +729,7 @@ class WordMaster {
     reset() {
         this.showView('setup');
         this.inputs.paste.value = '';
+        this.clearSetupNotice();
         // User requested to keep the selected library item
         // this.inputs.library.selectedIndex = 0;
         this.updateReviewButtons(); // Update button visibility after reset
