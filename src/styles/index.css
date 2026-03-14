@@ -432,9 +432,39 @@ button:active {
 }
 
 /* ===== Utilities ===== */
-.hidden {
-  display: none;
+.hidden { display: none; }
+
+.review-words-container {
+  max-height: 350px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  border: 1px solid var(--glass-border);
 }
+
+.review-word-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.review-word-item:last-child {
+  border-bottom: none;
+}
+
+.review-word-text {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.review-word-context {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 
 .setup-notice {
   margin: 0 0 1rem 0;

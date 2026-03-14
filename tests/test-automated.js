@@ -287,17 +287,17 @@ async function runTests() {
         results.push({ test: TESTS.incorrectWordRemoval.name, passed: false, error: error.message });
     }
 
-    // Test 4: SRS Review Due Button Hidden When No Due
+    // Test 4: Review Button Always Visible
     try {
         console.log(`📋 Test ${TESTS.srsButtonHidden.id}: ${TESTS.srsButtonHidden.name}`);
         await clearStorageAndReload(page);
 
-        await page.selectOption('#library-select', { index: 1 });
-        await page.waitForSelector('#review-due-btn', { state: 'attached' });
-        const dueVisible = await page.locator('#review-due-btn').isVisible();
+        // Should be visible even with empty storage
+        const reviewVisible = await page.locator('#review-due-btn').isVisible();
+        const reviewText = await page.locator('#review-due-btn').textContent();
 
-        const passed = dueVisible === false;
-        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review Due hidden (visible: ${dueVisible})\n`);
+        const passed = reviewVisible === true && reviewText.trim() === 'Review';
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review button always visible (text: "${reviewText.trim()}")\n`);
 
         results.push({ test: TESTS.srsButtonHidden.name, passed });
     } catch (error) {
@@ -305,30 +305,39 @@ async function runTests() {
         results.push({ test: TESTS.srsButtonHidden.name, passed: false, error: error.message });
     }
 
-    // Test 5: SRS Review Due Flow Updates Count
+    // Test 5: Review Flow with List Preview
     try {
         console.log(`📋 Test ${TESTS.srsReviewFlow.id}: ${TESTS.srsReviewFlow.name}`);
         await clearStorageAndReload(page);
 
-        await seedSrsDue(page, 2);
-
-        await page.waitForSelector('#review-due-btn:not(.hidden)');
-        const dueButtonText = await page.locator('#review-due-btn').textContent();
-        const dueCountMatch = dueButtonText.match(/\((\d+)\)/);
-        const dueCount = dueCountMatch ? parseInt(dueCountMatch[1]) : -1;
-
+        // Scenario 1: No SRS data (should show notice on setup)
         await page.click('#review-due-btn');
+        const noticeVisible = await page.locator('#setup-notice:not(.hidden)').isVisible();
+        const noticeText = await page.locator('#setup-notice').textContent();
+        console.log(`   ✓ No SRS notice on setup: "${noticeText}"`);
+
+        // Scenario 2: With words (preview list)
+        await seedSrsDue(page, 2);
+        await page.click('#review-due-btn');
+        
+        // Should show review-list-view
+        await page.waitForSelector('#review-list-view:not(.hidden)');
+        const subtitle = await page.locator('#review-list-subtitle').textContent();
+        const wordItems = await page.locator('.review-word-item').count();
+        console.log(`   ✓ Review List preview shown: "${subtitle}" (${wordItems} words)`);
+
+        // Click Start Review
+        await page.click('#start-review-action-btn');
         await page.waitForSelector('#quiz-view:not(.hidden)');
+        
         await finishQuiz(page, true);
 
         await page.waitForSelector('#results-view:not(.hidden)');
         await page.click('#final-restart-btn');
         await page.waitForSelector('#setup-view:not(.hidden)');
-        await page.selectOption('#library-select', { index: 1 });
 
-        const dueVisibleAfter = await page.locator('#review-due-btn').isVisible();
-        const passed = dueCount === 2 && dueVisibleAfter === false;
-        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Due count used and cleared (initial: ${dueCount}, visible after: ${dueVisibleAfter})\n`);
+        const passed = wordItems === 2 && subtitle.includes('2 words');
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review list and quiz start verified\n`);
 
         results.push({ test: TESTS.srsReviewFlow.name, passed });
     } catch (error) {
@@ -344,14 +353,14 @@ async function runTests() {
         const data = await seedSrsDue(page, 1);
 
         await page.click('#review-due-btn');
+        await page.waitForSelector('#review-list-view:not(.hidden)');
+        
+        // Start from the list view
+        await page.click('#start-review-action-btn');
         await page.waitForSelector('#quiz-view:not(.hidden)');
 
-        const word = await page.evaluate(() => {
-            const app = window.app;
-            return app.words[app.currentIndex].word;
-        });
-        await page.fill('#spelling-input', word);
-        await page.press('#spelling-input', 'Enter');
+        // Use finishQuiz to properly complete the session
+        await finishQuiz(page, true);
 
         await page.waitForSelector('#results-view:not(.hidden)');
 

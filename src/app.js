@@ -58,7 +58,8 @@ class WordMaster {
             setup: document.getElementById('setup-view'),
             quiz: document.getElementById('quiz-view'),
             results: document.getElementById('results-view'),
-            settings: document.getElementById('settings-view')
+            settings: document.getElementById('settings-view'),
+            reviewList: document.getElementById('review-list-view')
         };
 
         this.inputs = {
@@ -67,7 +68,9 @@ class WordMaster {
             spelling: document.getElementById('spelling-input'),
             meaning: document.getElementById('meaning-input'),
             meaningGroup: document.getElementById('meaning-group'),
-            voiceSelect: document.getElementById('voice-select')
+            voiceSelect: document.getElementById('voice-select'),
+            reviewWordsContainer: document.getElementById('review-words-container'),
+            reviewListSubtitle: document.getElementById('review-list-subtitle')
         };
 
         this.displays = {
@@ -93,7 +96,9 @@ class WordMaster {
             themeToggle: document.getElementById('theme-toggle'),
             settings: document.getElementById('settings-btn'),
             saveSettings: document.getElementById('save-settings-btn'),
-            previewVoice: document.getElementById('preview-voice-btn')
+            previewVoice: document.getElementById('preview-voice-btn'),
+            startReviewAction: document.getElementById('start-review-action-btn'),
+            backToSetup: document.getElementById('back-to-setup-btn')
         };
     }
 
@@ -173,6 +178,8 @@ class WordMaster {
         this.btns.settings.onclick = () => this.showView('settings');
         this.btns.saveSettings.onclick = () => this.saveSettings();
         this.btns.previewVoice.onclick = () => this.previewVoice();
+        this.btns.startReviewAction.onclick = () => this.startQuizCommon();
+        this.btns.backToSetup.onclick = () => this.showView('setup');
 
         const quizModeRadios = document.querySelectorAll('input[name="quiz-mode"]');
         quizModeRadios.forEach(radio => {
@@ -327,23 +334,44 @@ class WordMaster {
         this.saveSrsData();
     }
 
-    getSrsDueForBook(book, chapter) {
+    getGlobalSrsDue() {
         const now = Date.now();
-        const words = wordlyLibrary[book][chapter];
-        const due = words.filter(item => {
-            const key = makeSrsKey(book, chapter, item.word);
+        const due = [];
+        for (const key in this.srsData) {
             const entry = this.srsData[key];
-            return entry && entry.nextDue <= now;
-        });
+            if (entry && entry.nextDue <= now) {
+                const [book, chapter, word] = key.split('|');
+                const wordObj = wordlyLibrary[book]?.[chapter]?.find(w => w.word === word);
+                if (wordObj) {
+                    due.push({ ...wordObj, book, chapter });
+                }
+            }
+        }
         return due.sort((a, b) => {
-            const keyA = makeSrsKey(book, chapter, a.word);
-            const keyB = makeSrsKey(book, chapter, b.word);
+            const keyA = makeSrsKey(a.book, a.chapter, a.word);
+            const keyB = makeSrsKey(b.book, b.chapter, b.word);
             return (this.srsData[keyA].nextDue || 0) - (this.srsData[keyB].nextDue || 0);
         });
     }
 
-    getSrsDueCountForBook(book, chapter) {
-        return this.getSrsDueForBook(book, chapter).length;
+    getSrsSoon(count = 15) {
+        const now = Date.now();
+        const soon = [];
+        for (const key in this.srsData) {
+            const entry = this.srsData[key];
+            if (entry && entry.nextDue > now) {
+                const [book, chapter, word] = key.split('|');
+                const wordObj = wordlyLibrary[book]?.[chapter]?.find(w => w.word === word);
+                if (wordObj) {
+                    soon.push({ ...wordObj, book, chapter });
+                }
+            }
+        }
+        return soon.sort((a, b) => {
+            const keyA = makeSrsKey(a.book, a.chapter, a.word);
+            const keyB = makeSrsKey(b.book, b.chapter, b.word);
+            return (this.srsData[keyA].nextDue || 0) - (this.srsData[keyB].nextDue || 0);
+        }).slice(0, count);
     }
 
     saveSettings() {
@@ -381,34 +409,26 @@ class WordMaster {
     updateReviewButtons() {
         const libVal = this.inputs.library.value;
 
-        if (!libVal) {
-            // No library selected → hide button
-            this.btns.startReview.classList.add('hidden');
-            this.btns.startReviewDue.classList.add('hidden');
-            return;
-        }
-
-        const [book, chapter] = libVal.split('|');
-        const count = this.getIncorrectCountForBook(book, chapter);
-        const dueCount = this.getSrsDueCountForBook(book, chapter);
-
-        if (count === 0) {
-            this.btns.startReview.classList.add('hidden');
+        if (libVal) {
+            const [book, chapter] = libVal.split('|');
+            const count = this.getIncorrectCountForBook(book, chapter);
+            if (count === 0) {
+                this.btns.startReview.classList.add('hidden');
+            } else {
+                this.btns.startReview.classList.remove('hidden');
+                this.btns.startReview.textContent = `Review Incorrect (${count})`;
+            }
         } else {
-            this.btns.startReview.classList.remove('hidden');
-            this.btns.startReview.textContent = `Review Incorrect (${count})`;
+            this.btns.startReview.classList.add('hidden');
         }
 
-        if (dueCount === 0) {
-            this.btns.startReviewDue.classList.add('hidden');
-        } else {
-            this.btns.startReviewDue.classList.remove('hidden');
-            this.btns.startReviewDue.textContent = `Review Due (${dueCount})`;
-        }
+        this.btns.startReviewDue.classList.remove('hidden');
+        this.btns.startReviewDue.textContent = `Review`;
     }
 
     startReviewQuiz() {
         const libVal = this.inputs.library.value;
+        this.clearSetupNotice();
         if (!libVal) {
             this.showSetupNotice("Please select a library item first.");
             return;
@@ -437,25 +457,53 @@ class WordMaster {
     }
 
     startSrsReviewQuiz() {
-        const libVal = this.inputs.library.value;
-        if (!libVal) {
-            this.showSetupNotice("Please select a library item first.");
+        let wordsToReview = this.getGlobalSrsDue();
+        let isFallback = false;
+
+        if (wordsToReview.length === 0) {
+            wordsToReview = this.getSrsSoon(15);
+            isFallback = true;
+        }
+
+        if (wordsToReview.length === 0) {
+            this.showSetupNotice("No words in your review list yet. Master some words first!", false);
             return;
         }
 
-        const [book, chapter] = libVal.split('|');
-        const dueWords = this.getSrsDueForBook(book, chapter);
-
-        if (dueWords.length === 0) {
-            this.showSetupNotice("No words are due for review yet.", false);
-            return;
-        }
-
-        this.words = [...dueWords];
-        this.currentBook = book;
-        this.currentChapter = chapter;
+        this.words = [...wordsToReview];
+        this.currentBook = null;
+        this.currentChapter = null;
         this.quizSource = 'SRS';
-        this.startQuizCommon();
+
+        this.showView('reviewList');
+        this.renderReviewList(isFallback);
+    }
+
+    renderReviewList(isFallback) {
+        const container = this.inputs.reviewWordsContainer;
+        const subtitle = this.inputs.reviewListSubtitle;
+        const startBtn = this.btns.startReviewAction;
+
+        container.innerHTML = '';
+        startBtn.disabled = this.words.length === 0;
+
+        if (isFallback) {
+            subtitle.textContent = `No words due! Reviewing ${this.words.length} words due soonest.`;
+            subtitle.style.color = 'var(--text-muted)';
+        } else {
+            subtitle.textContent = `You have ${this.words.length} words due for review.`;
+            subtitle.style.color = 'var(--success)';
+        }
+
+        this.words.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'review-word-item';
+            div.innerHTML = `
+                <span class="review-word-text">${item.word}</span>
+                <span class="review-word-context">${item.book} - ${item.chapter}</span>
+            `;
+            container.appendChild(div);
+        });
     }
 
     updatePlaceholder() {
@@ -478,6 +526,7 @@ class WordMaster {
     startQuiz() {
         let selectedList = [];
         const libVal = this.inputs.library.value;
+        this.clearSetupNotice();
 
         // Capture Quiz Mode
         const modeEl = document.querySelector('input[name="quiz-mode"]:checked');
@@ -506,7 +555,7 @@ class WordMaster {
 
     startQuizCommon() {
         if (!this.words || this.words.length === 0) return;
-        this.clearSetupNotice();
+        // this.clearSetupNotice();
 
         // Clear any previous feedback state at quiz start
         this.displays.feedback.classList.add('hidden');
@@ -620,6 +669,8 @@ class WordMaster {
 
     handleCheck() {
         const current = this.words[this.currentIndex];
+        const book = current.book || this.currentBook;
+        const chapter = current.chapter || this.currentChapter;
 
         if (this.state === 'QUIZ') {
             // Block submission if spelling field is empty
@@ -654,11 +705,11 @@ class WordMaster {
             if (isSpellingCorrect) {
                 this.score.correct++;
                 this.masteredWords.add(current.word);
-                if (this.currentBook && this.currentChapter) {
+                if (book && chapter) {
                     if (this.quizSource === 'SRS') {
-                        this.updateSrsOnAnswer(current.word, this.currentBook, this.currentChapter, true);
+                        this.updateSrsOnAnswer(current.word, book, chapter, true);
                     } else {
-                        this.ensureSrsEntry(current.word, this.currentBook, this.currentChapter);
+                        this.ensureSrsEntry(current.word, book, chapter);
                     }
                 }
                 // Remove from incorrect list (if present)
@@ -666,18 +717,18 @@ class WordMaster {
                 this.showFeedback(true, correctMsg);
             } else {
                 this.score.incorrect++;
-                if (this.currentBook && this.currentChapter && this.quizSource === 'SRS') {
-                    this.updateSrsOnAnswer(current.word, this.currentBook, this.currentChapter, false);
+                if (book && chapter && this.quizSource === 'SRS') {
+                    this.updateSrsOnAnswer(current.word, book, chapter, false);
                 }
 
                 // Remove old entry if exists, then add new one with metadata
                 this.incorrectWords = this.incorrectWords.filter(item => item.word !== current.word);
 
-                if (this.currentBook && this.currentChapter) {
+                if (book && chapter) {
                     this.incorrectWords.push({
                         word: current.word,
-                        book: this.currentBook,
-                        chapter: this.currentChapter
+                        book: book,
+                        chapter: chapter
                     });
                 }
 

@@ -46,7 +46,10 @@ Existing `wordmaster-mastered` words are seeded once into SRS:
 Seeding only occurs if SRS data is empty and not already seeded.
 
 ## UI Behavior
-- "Review Due" appears only in Library mode.
-- Button count shows items with `nextDue <= now`.
-- Starting "Review Due" loads only due words for the selected book/chapter.
-- "Review Incorrect" is unchanged and remains separate.
+- "Review" button is always visible on the setup screen.
+- Button text updates based on state:
+  - "Review Due (N)" if items are due.
+  - "Review (No Due)" if no items are currently due.
+- Starting "Review" with no due items will load up to 15 words that are due soonest.
+- It does not require selecting a specific book/chapter.
+- "Review Incorrect" remains scoped to the selected book/chapter.
