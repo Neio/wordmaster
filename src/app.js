@@ -86,7 +86,6 @@ class WordMaster {
             speak: document.getElementById('speak-btn'),
             check: document.getElementById('check-btn'),
             next: document.getElementById('next-btn'),
-            next: document.getElementById('next-btn'),
             restart: document.getElementById('restart-btn'),
             finalRestart: document.getElementById('final-restart-btn'),
             startReview: document.getElementById('review-btn'),
@@ -397,14 +396,14 @@ class WordMaster {
             this.btns.startReview.classList.add('hidden');
         } else {
             this.btns.startReview.classList.remove('hidden');
-            this.btns.startReview.textContent = `Review Incorrect(${count})`;
+            this.btns.startReview.textContent = `Review Incorrect (${count})`;
         }
 
         if (dueCount === 0) {
             this.btns.startReviewDue.classList.add('hidden');
         } else {
             this.btns.startReviewDue.classList.remove('hidden');
-            this.btns.startReviewDue.textContent = `Review Due(${dueCount})`;
+            this.btns.startReviewDue.textContent = `Review Due (${dueCount})`;
         }
     }
 

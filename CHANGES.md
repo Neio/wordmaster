@@ -1,3 +1,58 @@
+# Changes — feature/srs-review-due
+
+**Branch**: `feature/srs-review-due`
+**Base**: `main`
+**Date**: 2026-03-13
+**Version**: `202603130001`
+
+---
+
+## Features
+
+### Spaced Repetition (SRS) Review Mode (`abf761a`)
+- Added a new "Review Due" mode using a simplified SM-2 algorithm.
+- Items are scheduled based on performance (Correct: quality 5, Incorrect: quality 2).
+- Ease factor and intervals (1, 6, 17+ days) update dynamically to optimize long-term retention.
+- "Review Due (N)" button appears in Library mode when words are ready for review.
+- Automatic seeding: Existing mastered words are automatically imported into the SRS system on first load.
+
+### Improved SRS UX (`876ca7c`)
+- Added clear visual feedback for due word counts.
+- SRS state updates immediately after each answer in SRS mode.
+- Correctly answered words in regular quiz mode are automatically added to SRS.
+
+---
+
+## Bug Fixes
+
+### Feedback Persistence (`6c72aec`)
+- Fixed a bug where feedback from a previous quiz would persist after restarting.
+- Feedback is now explicitly cleared when the quiz is reset or started.
+
+### UI Consistency (`876ca7c`)
+- Fixed duplicate button references in `app.js`.
+- Improved button labels with proper spacing (e.g., "Review Due (5)" instead of "Review Due(5)").
+
+---
+
+## Testing
+
+### Automated Playwright Suite (`f495916`)
+- Expanded `tests/test-automated.js` with comprehensive SRS coverage:
+  - Button visibility and count updates.
+  - Memory curve state verification (reps, interval, ease).
+  - Feedback clearing on restart.
+- Added `tests/test-srs.js` for unit testing the SM-2 scheduling logic.
+
+---
+
+## Housekeeping
+
+- Updated `TEST_PLAN.md` with detailed SRS verification steps.
+- Version bumped to `202603130001` with cache-busting updates in `index.html` and `src/app.js`.
+
+---
+
 # Changes — feature/dictionary-definitions
 
 **Branch**: `feature/dictionary-definitions`  

@@ -10,6 +10,7 @@
   - *Vocabulary from Classical Roots - Book E* (Lessons 1-16)
   - *Purposeful Design Spelling Plus - Grade 3*
   - *Wordly Wise* (Sample Lessons)
+- **🧠 Spaced Repetition (SRS)**: Optimized review mode using the SM-2 algorithm. "Review Due" button automatically identifies words ready for reinforcement.
 - **⚡️ One-Shot Verification**: Fast-paced quiz flow. Type your spelling and verify instantly.
 - **⚙️ New Quiz Modes**: Choose between **Spelling Only** (hidden meaning) or **Spelling & Meaning** (both inputs visible).
 - **🗣️ Pronunciation**: Uses the Web Speech API to pronounce words automatically or on demand.

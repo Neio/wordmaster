@@ -283,3 +283,30 @@ Use this abbreviated list to quickly verify no regressions:
 11. [ ] Word root displays clearly
 12. [ ] Feedback appears only AFTER user submits answer (not on quiz start)
 13. [ ] Mobile: No zoom on input focus
+
+### 7. Spaced Repetition (SRS)
+
+#### 7.1. Button Visibility
+- [ ] Select library book with 0 due items → Verify "Review Due" button is HIDDEN
+- [ ] Mock some words as due in localStorage (`wordmaster-srs-v1`)
+- [ ] Reload page, select book → Verify "Review Due (N)" button is VISIBLE
+- [ ] Verify count correctly reflects due items
+
+#### 7.2. Review Due Flow
+- [ ] Start "Review Due" session
+- [ ] Verify words are presented in due order
+- [ ] Complete session by answering all words correctly
+- [ ] Return to setup screen
+- [ ] Verify "Review Due" button is HIDDEN (all reviewed)
+
+#### 7.3. SRS State Updates (Memory Curve)
+- [ ] Verify SRS state in localStorage (`wordmaster-srs-v1`):
+  - Correct answer (quality 5) → Increases reps, interval, and ease
+  - Incorrect answer (quality 2) → Resets reps to 0, interval to 1
+- [ ] Verify `nextDue` timestamp is correctly calculated based on new interval
+
+#### 7.4. Automatic Seeding
+- [ ] Clear SRS data, ensure `wordmaster-mastered` has words
+- [ ] Reload page
+- [ ] Verify `wordmaster-srs-v1` is seeded with mastered words
+- [ ] Verify `wordmaster-srs-seeded` flag is set to "1"
