@@ -466,6 +466,20 @@ button:active {
 }
 
 
+#review-list-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+#review-list-subtitle.status-success {
+  color: var(--success);
+}
+
+.view-actions {
+  margin-top: 2rem;
+}
+
 .setup-notice {
   margin: 0 0 1rem 0;
   padding: 0.75rem 1rem;

@@ -340,33 +340,31 @@ class WordMaster {
         this.saveSrsData();
     }
 
-    getGlobalSrsDue() {
+    _getSrsWords(filterFn, limit = null) {
         const now = Date.now();
-        return Object.entries(this.srsData)
+        let list = Object.entries(this.srsData)
             .map(([key, entry]) => {
                 const wordObj = this.wordMap.get(key);
                 if (!wordObj) return null;
                 const [book, chapter] = key.split('|');
                 return { item: wordObj, entry, book, chapter };
             })
-            .filter(mapped => mapped && mapped.entry.nextDue <= now)
-            .sort((a, b) => a.entry.nextDue - b.entry.nextDue)
-            .map(({ item, book, chapter }) => ({ ...item, book, chapter }));
+            .filter(mapped => mapped && filterFn(mapped.entry, now))
+            .sort((a, b) => a.entry.nextDue - b.entry.nextDue);
+
+        if (limit) {
+            list = list.slice(0, limit);
+        }
+
+        return list.map(({ item, book, chapter }) => ({ ...item, book, chapter }));
+    }
+
+    getGlobalSrsDue() {
+        return this._getSrsWords((entry, now) => entry.nextDue <= now);
     }
 
     getSrsSoon(count = 15) {
-        const now = Date.now();
-        return Object.entries(this.srsData)
-            .map(([key, entry]) => {
-                const wordObj = this.wordMap.get(key);
-                if (!wordObj) return null;
-                const [book, chapter] = key.split('|');
-                return { item: wordObj, entry, book, chapter };
-            })
-            .filter(mapped => mapped && mapped.entry.nextDue > now)
-            .sort((a, b) => a.entry.nextDue - b.entry.nextDue)
-            .slice(0, count)
-            .map(({ item, book, chapter }) => ({ ...item, book, chapter }));
+        return this._getSrsWords((entry, now) => entry.nextDue > now, count);
     }
 
     saveSettings() {
@@ -378,7 +376,7 @@ class WordMaster {
 
     previewVoice() {
         const selectedURI = this.inputs.voiceSelect.value;
-        const utterance = new SpeechSynthesisUtterance("Apple, a round fruit with red or green skin and a whitish interior.");
+        const utterance = new SpeechSynthesisUtterance("Apple, a round fruit with red or green skin and whitish interior.");
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
 
@@ -486,19 +484,26 @@ class WordMaster {
 
         if (isFallback) {
             subtitle.textContent = `No words due! Reviewing ${this.words.length} words due soonest.`;
-            subtitle.style.color = 'var(--text-muted)';
+            subtitle.classList.remove('status-success');
         } else {
             subtitle.textContent = `You have ${this.words.length} words due for review.`;
-            subtitle.style.color = 'var(--success)';
+            subtitle.classList.add('status-success');
         }
 
         this.words.forEach(item => {
             const div = document.createElement('div');
             div.className = 'review-word-item';
-            div.innerHTML = `
-                <span class="review-word-text">${item.word}</span>
-                <span class="review-word-context">${item.book} - ${item.chapter}</span>
-            `;
+
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'review-word-text';
+            wordSpan.textContent = item.word;
+
+            const contextSpan = document.createElement('span');
+            contextSpan.className = 'review-word-context';
+            contextSpan.textContent = `${item.book} - ${item.chapter}`;
+
+            div.appendChild(wordSpan);
+            div.appendChild(contextSpan);
             container.appendChild(div);
         });
     }

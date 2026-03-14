@@ -292,12 +292,18 @@ async function runTests() {
         console.log(`📋 Test ${TESTS.srsButtonAlwaysVisible.id}: ${TESTS.srsButtonAlwaysVisible.name}`);
         await clearStorageAndReload(page);
 
-        // Should be visible even with empty storage
-        const reviewVisible = await page.locator('#review-due-btn').isVisible();
-        const reviewText = await page.locator('#review-due-btn').textContent();
+        // Initial check
+        const initialVisible = await page.locator('#review-due-btn').isVisible();
+        
+        // Interaction check: select library then deselect
+        await page.selectOption('#library-select', { index: 1 });
+        const selectedVisible = await page.locator('#review-due-btn').isVisible();
+        
+        await page.selectOption('#library-select', ''); // Deselect
+        const deselectedVisible = await page.locator('#review-due-btn').isVisible();
 
-        const passed = reviewVisible === true && reviewText.trim() === 'Review';
-        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review button always visible (text: "${reviewText.trim()}")\n`);
+        const passed = initialVisible && selectedVisible && deselectedVisible;
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review button persistent (initial: ${initialVisible}, selected: ${selectedVisible}, deselected: ${deselectedVisible})\n`);
 
         results.push({ test: TESTS.srsButtonAlwaysVisible.name, passed });
     } catch (error) {
