@@ -1,6 +1,6 @@
-import { wordlyLibrary } from './data/library.js?v=202603130001';
-import { verifySpelling, isMeaningCorrect } from './utils/VerificationLogic.js?v=202603130001';
-import { computeNextSrs, makeSrsKey, seedMastered } from './utils/SrsScheduler.js?v=202603130001';
+import { wordlyLibrary } from './data/library.js?v=202603130002';
+import { verifySpelling, isMeaningCorrect } from './utils/VerificationLogic.js?v=202603130002';
+import { computeNextSrs, makeSrsKey, seedMastered } from './utils/SrsScheduler.js?v=202603130002';
 
 class WordMaster {
     constructor() {

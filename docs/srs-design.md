@@ -46,10 +46,9 @@ Existing `wordmaster-mastered` words are seeded once into SRS:
 Seeding only occurs if SRS data is empty and not already seeded.
 
 ## UI Behavior
-- "Review" button is always visible on the setup screen.
-- Button text updates based on state:
-  - "Review Due (N)" if items are due.
-  - "Review (No Due)" if no items are currently due.
-- Starting "Review" with no due items will load up to 15 words that are due soonest.
-- It does not require selecting a specific book/chapter.
-- "Review Incorrect" remains scoped to the selected book/chapter.
+- "Review" button is always visible on the setup screen and does not require selecting a specific book/chapter.
+- Clicking "Review" opens an intermediate **Review List** view showing:
+  - All words currently due for review.
+  - If no words are due, a fallback list of the **15 words due soonest** is displayed.
+- Users can preview the list and then click **"Start Review"** to begin the quiz, or **"Back to Setup"** to return.
+- "Review Incorrect" remains a separate, book-scoped feature for immediate correction.
