@@ -26,10 +26,10 @@ const TESTS = {
         name: 'Correctly Answered Words Removed from Incorrect List',
         description: 'Words corrected in review mode should be removed'
     },
-    srsButtonHidden: {
+    srsButtonAlwaysVisible: {
         id: '7.1',
-        name: 'SRS Review Due Button Hidden When No Due',
-        description: 'Review Due should be hidden if no due items exist'
+        name: 'SRS Review Button Always Visible',
+        description: 'Review button should always be visible on the setup screen'
     },
     srsReviewFlow: {
         id: '7.2',
@@ -289,7 +289,7 @@ async function runTests() {
 
     // Test 4: Review Button Always Visible
     try {
-        console.log(`📋 Test ${TESTS.srsButtonHidden.id}: ${TESTS.srsButtonHidden.name}`);
+        console.log(`📋 Test ${TESTS.srsButtonAlwaysVisible.id}: ${TESTS.srsButtonAlwaysVisible.name}`);
         await clearStorageAndReload(page);
 
         // Should be visible even with empty storage
@@ -299,10 +299,10 @@ async function runTests() {
         const passed = reviewVisible === true && reviewText.trim() === 'Review';
         console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review button always visible (text: "${reviewText.trim()}")\n`);
 
-        results.push({ test: TESTS.srsButtonHidden.name, passed });
+        results.push({ test: TESTS.srsButtonAlwaysVisible.name, passed });
     } catch (error) {
         console.error(`   ❌ ERROR: ${error.message}\n`);
-        results.push({ test: TESTS.srsButtonHidden.name, passed: false, error: error.message });
+        results.push({ test: TESTS.srsButtonAlwaysVisible.name, passed: false, error: error.message });
     }
 
     // Test 5: Review Flow with List Preview

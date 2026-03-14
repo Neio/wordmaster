@@ -336,42 +336,29 @@ class WordMaster {
 
     getGlobalSrsDue() {
         const now = Date.now();
-        const due = [];
-        for (const key in this.srsData) {
-            const entry = this.srsData[key];
-            if (entry && entry.nextDue <= now) {
+        return Object.entries(this.srsData)
+            .map(([key, entry]) => {
                 const [book, chapter, word] = key.split('|');
                 const wordObj = wordlyLibrary[book]?.[chapter]?.find(w => w.word === word);
-                if (wordObj) {
-                    due.push({ ...wordObj, book, chapter });
-                }
-            }
-        }
-        return due.sort((a, b) => {
-            const keyA = makeSrsKey(a.book, a.chapter, a.word);
-            const keyB = makeSrsKey(b.book, b.chapter, b.word);
-            return (this.srsData[keyA].nextDue || 0) - (this.srsData[keyB].nextDue || 0);
-        });
+                return { item: wordObj, entry, book, chapter };
+            })
+            .filter(({ item, entry }) => item && entry && entry.nextDue <= now)
+            .sort((a, b) => (a.entry.nextDue || 0) - (b.entry.nextDue || 0))
+            .map(({ item, book, chapter }) => ({ ...item, book, chapter }));
     }
 
     getSrsSoon(count = 15) {
         const now = Date.now();
-        const soon = [];
-        for (const key in this.srsData) {
-            const entry = this.srsData[key];
-            if (entry && entry.nextDue > now) {
+        return Object.entries(this.srsData)
+            .map(([key, entry]) => {
                 const [book, chapter, word] = key.split('|');
                 const wordObj = wordlyLibrary[book]?.[chapter]?.find(w => w.word === word);
-                if (wordObj) {
-                    soon.push({ ...wordObj, book, chapter });
-                }
-            }
-        }
-        return soon.sort((a, b) => {
-            const keyA = makeSrsKey(a.book, a.chapter, a.word);
-            const keyB = makeSrsKey(b.book, b.chapter, b.word);
-            return (this.srsData[keyA].nextDue || 0) - (this.srsData[keyB].nextDue || 0);
-        }).slice(0, count);
+                return { item: wordObj, entry, book, chapter };
+            })
+            .filter(({ item, entry }) => item && entry && entry.nextDue > now)
+            .sort((a, b) => (a.entry.nextDue || 0) - (b.entry.nextDue || 0))
+            .slice(0, count)
+            .map(({ item, book, chapter }) => ({ ...item, book, chapter }));
     }
 
     saveSettings() {
@@ -416,14 +403,16 @@ class WordMaster {
                 this.btns.startReview.classList.add('hidden');
             } else {
                 this.btns.startReview.classList.remove('hidden');
-                this.btns.startReview.textContent = `Review Incorrect (${count})`;
+                const btnText = this.btns.startReview.querySelector('.btn-text');
+                if (btnText) btnText.textContent = `Review Incorrect (${count})`;
             }
         } else {
             this.btns.startReview.classList.add('hidden');
         }
 
         this.btns.startReviewDue.classList.remove('hidden');
-        this.btns.startReviewDue.textContent = `Review`;
+        const srsText = this.btns.startReviewDue.querySelector('.btn-text');
+        if (srsText) srsText.textContent = `Review`;
     }
 
     startReviewQuiz() {

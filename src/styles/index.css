@@ -482,7 +482,7 @@ button:active {
   background: rgba(200, 90, 84, 0.08);
 }
 
-.secondary-outline {
+.btn--outline {
   background: var(--bg);
   border: 1px solid var(--primary);
   color: var(--primary);
