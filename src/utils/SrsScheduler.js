@@ -15,8 +15,8 @@ export const computeNextSrs = (state, quality, nowMs) => {
         prevEase + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
     );
 
-    let reps = prevReps;
-    let intervalDays = prevInterval;
+    let reps;
+    let intervalDays;
 
     if (q < 3) {
         reps = 0;

@@ -27,7 +27,7 @@ ease = max(1.3, ease + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)))
 ```
 
 Interval update:
-- If `q < 3`: `reps = 0`, `intervalDays = 1`
+- If incorrect (q < 3): `reps = 0`, `intervalDays = 1`
 - Else:
   - `reps += 1`
   - `reps == 1` => `intervalDays = 1`
