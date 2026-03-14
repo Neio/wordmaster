@@ -569,9 +569,7 @@ class WordMaster {
         const modeEl = document.querySelector('input[name="quiz-mode"]:checked');
         this.quizMode = modeEl ? modeEl.value : 'spelling-only';
 
-        this.views.setup.classList.add('hidden');
-        this.views.results.classList.add('hidden');
-        this.views.quiz.classList.remove('hidden');
+        this.showView('quiz');
 
         this.updateInputVisibility();
         this.resetInputs();
