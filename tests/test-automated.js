@@ -329,7 +329,10 @@ async function runTests() {
         // Should show review-list-view
         await page.waitForSelector('#review-list-view:not(.hidden)');
         const subtitle = await page.locator('#review-list-subtitle').textContent();
-        const wordItems = await page.locator('.review-word-item').count();
+        // Wait for items to be rendered in the container
+        const container = page.locator('#review-words-container');
+        await page.waitForSelector('.review-word-item');
+        const wordItems = await container.locator('.review-word-item').count();
         console.log(`   ✓ Review List preview shown: "${subtitle}" (${wordItems} words)`);
 
         // Click Start Review

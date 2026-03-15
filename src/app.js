@@ -356,7 +356,7 @@ class WordMaster {
             list = list.slice(0, limit);
         }
 
-        return list.map(({ item, book, chapter }) => ({ ...item, book, chapter }));
+        return list.map(({ item, entry, book, chapter }) => ({ ...item, entry, book, chapter }));
     }
 
     getGlobalSrsDue() {
@@ -494,6 +494,9 @@ class WordMaster {
             const div = document.createElement('div');
             div.className = 'review-word-item';
 
+            const wordInfo = document.createElement('div');
+            wordInfo.className = 'review-word-info';
+
             const wordSpan = document.createElement('span');
             wordSpan.className = 'review-word-text';
             wordSpan.textContent = item.word;
@@ -502,8 +505,26 @@ class WordMaster {
             contextSpan.className = 'review-word-context';
             contextSpan.textContent = `${item.book} - ${item.chapter}`;
 
-            div.appendChild(wordSpan);
-            div.appendChild(contextSpan);
+            wordInfo.appendChild(wordSpan);
+            wordInfo.appendChild(contextSpan);
+
+            const dueSpan = document.createElement('span');
+            dueSpan.className = 'review-word-due';
+            
+            // Format date: "Mar 14" or "Today" if due now
+            const now = new Date();
+            const due = new Date(item.entry.nextDue);
+            const isToday = due.toDateString() === now.toDateString();
+            
+            if (item.entry.nextDue <= Date.now()) {
+                dueSpan.textContent = 'Due Now';
+                dueSpan.style.color = 'var(--success)';
+            } else {
+                dueSpan.textContent = isToday ? 'Due Today' : due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            }
+
+            div.appendChild(wordInfo);
+            div.appendChild(dueSpan);
             container.appendChild(div);
         });
     }
