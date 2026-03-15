@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordMaster - Interactive Vocabulary Quiz</title>
-    <link rel="stylesheet" href="src/styles/index.css?v=202602280006">
+    <link rel="stylesheet" href="src/styles/index.css?v=202603130002">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
@@ -45,21 +45,46 @@
                 </label>
             </div>
 
+            <div id="setup-notice" class="setup-notice hidden"></div>
+
             <div class="input-group">
                 <label>Paste Word List (word: definition)</label>
                 <textarea id="word-paste" rows="8"
                     placeholder="apple: a red fruit&#10;banana: a yellow long fruit"></textarea>
             </div>
 
-            <div style="display: flex; gap: 1rem;">
-                <button id="start-btn" style="flex: 2;">
+            <div class="setup-actions">
+                <button id="start-btn">
                     <i data-lucide="play"></i>
                     Start Quiz
                 </button>
-                <button id="review-btn" class="secondary-btn"
-                    style="flex: 1; background: var(--bg); border: 1px solid var(--primary); color: var(--primary);">
+                <button id="review-due-btn" class="secondary-btn">
+                    <i data-lucide="brain"></i>
+                    <span class="btn-text">Review</span>
+                </button>
+                <button id="review-btn" class="secondary-btn btn--outline">
                     <i data-lucide="book-open"></i>
-                    Review Incorrect
+                    <span class="btn-text">Review Incorrect</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="review-list-view" class="card hidden">
+            <h1>Review List</h1>
+            <p id="review-list-subtitle">
+                The following words are due for review.
+            </p>
+            <div id="review-words-container" class="review-words-container">
+                <!-- Word list will be populated here -->
+            </div>
+            <div class="setup-actions view-actions">
+                <button id="start-review-action-btn">
+                    <i data-lucide="play"></i>
+                    <span class="btn-text">Start Review</span>
+                </button>
+                <button id="back-to-setup-btn" class="secondary-btn btn--outline">
+                    <i data-lucide="arrow-left"></i>
+                    <span class="btn-text">Back to Setup</span>
                 </button>
             </div>
         </div>
@@ -150,11 +175,11 @@
 
         <footer class="copyright-footer">
             &copy; 2026 Neio Zhou. All rights reserved.
-            <span style="margin-left: 1rem; opacity: 0.4; font-size: 0.75em;">v 202602280006</span>
+            <span style="margin-left: 1rem; opacity: 0.4; font-size: 0.75em;">v 202603130002</span>
         </footer>
     </div>
 
-    <script type="module" src="src/app.js?v=202602280006"></script>
+    <script type="module" src="src/app.js?v=202603130002"></script>
 </body>
 
 </html>

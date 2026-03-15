@@ -25,6 +25,21 @@ const TESTS = {
         id: '5.6',
         name: 'Correctly Answered Words Removed from Incorrect List',
         description: 'Words corrected in review mode should be removed'
+    },
+    srsButtonAlwaysVisible: {
+        id: '7.1',
+        name: 'SRS Review Button Always Visible',
+        description: 'Review button should always be visible on the setup screen'
+    },
+    srsReviewFlow: {
+        id: '7.2',
+        name: 'SRS Review Due Flow Updates Count',
+        description: 'Due count should drop to 0 after reviewing due items'
+    },
+    srsCurveUpdate: {
+        id: '7.3',
+        name: 'SRS Memory Curve Updates State',
+        description: 'Correct answer should advance reps, interval, and ease'
     }
 };
 
@@ -44,11 +59,24 @@ async function runTests() {
             const resultsVisible = await page.locator('#results-view').isVisible();
             if (resultsVisible) break;
 
+            // If next button is visible, advance to next word
+            if (await page.locator('#next-btn:not(.hidden)').isVisible()) {
+                await page.locator('#next-btn:not(.hidden)').click();
+                await page.waitForTimeout(200);
+                continue;
+            }
+
             const inputVisible = await page.locator('#spelling-input').isVisible();
             if (!inputVisible) {
                 // Wait a bit and check results again
                 await page.waitForTimeout(500);
                 if (await page.locator('#results-view').isVisible()) break;
+                continue;
+            }
+
+            const inputEnabled = await page.locator('#spelling-input').isEnabled();
+            if (!inputEnabled) {
+                await page.waitForTimeout(200);
                 continue;
             }
 
@@ -80,10 +108,55 @@ async function runTests() {
         }
     }
 
+    async function clearStorageAndReload(page) {
+        await page.goto(BASE_URL);
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.evaluate(() => localStorage.clear());
+        await page.reload();
+        await page.waitForSelector('#setup-view:not(.hidden)');
+    }
+
+    async function seedSrsDue(page, dueCount = 2) {
+        await page.selectOption('#library-select', { index: 1 });
+        await page.click('#start-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+
+        const data = await page.evaluate((count) => {
+            const app = window.app;
+            const words = app.words.slice(0, count).map(w => w.word);
+            return { book: app.currentBook, chapter: app.currentChapter, words };
+        }, dueCount);
+
+        const now = Date.now();
+        await page.evaluate(({ data, now }) => {
+            const srs = {};
+            data.words.forEach(word => {
+                const key = `${data.book}|${data.chapter}|${word}`;
+                srs[key] = {
+                    reps: 1,
+                    intervalDays: 1,
+                    ease: 2.5,
+                    lastReviewed: now - 86400000,
+                    nextDue: now - 1000
+                };
+            });
+            localStorage.setItem('wordmaster-srs-v1', JSON.stringify(srs));
+            localStorage.setItem('wordmaster-srs-seeded', '1');
+        }, { data, now });
+
+        await page.click('#restart-btn');
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.reload();
+        await page.waitForSelector('#setup-view:not(.hidden)');
+        await page.selectOption('#library-select', { index: 1 });
+
+        return data;
+    }
+
     // Test 1: Feedback Persistence Bug Fix
     try {
         console.log(`📋 Test ${TESTS.feedbackPersistence.id}: ${TESTS.feedbackPersistence.name}`);
-        await page.goto(BASE_URL);
+        await clearStorageAndReload(page);
 
         // Start quiz with paste method
         await page.fill('#word-paste', 'apple\nbanana\ncarrot');
@@ -125,7 +198,7 @@ async function runTests() {
     // Note: Review button relies on Library mode
     try {
         console.log(`📋 Test ${TESTS.reviewButtonPersistence.id}: ${TESTS.reviewButtonPersistence.name}`);
-        await page.goto(BASE_URL);
+        await clearStorageAndReload(page);
 
         // Start with library
         await page.selectOption('#library-select', { index: 1 }); // Select first book
@@ -177,11 +250,8 @@ async function runTests() {
         await page.fill('#spelling-input', word);
         await page.press('#spelling-input', 'Enter');
 
-        // Wait for correct feedback (optional) but ensure we move on
-        // Usually correct auto-advances or shows next? 
-        // In app.js handleCheck: if correct -> showFeedback -> setTimeout(nextWord, 1500) if spelling-only?
-        // Let's assume spelling-only mode auto-advances or we wait
-        await page.waitForTimeout(2000);
+        // Wait until input re-enabled or Next appears
+        await page.waitForSelector('#next-btn:not(.hidden), #spelling-input:enabled, #results-view:not(.hidden)');
 
         // If still on input, click next (if button visible)
         if (await page.locator('#next-btn:not(.hidden)').isVisible()) {
@@ -215,6 +285,112 @@ async function runTests() {
     } catch (error) {
         console.error(`   ❌ ERROR: ${error.message}\n`);
         results.push({ test: TESTS.incorrectWordRemoval.name, passed: false, error: error.message });
+    }
+
+    // Test 4: Review Button Always Visible
+    try {
+        console.log(`📋 Test ${TESTS.srsButtonAlwaysVisible.id}: ${TESTS.srsButtonAlwaysVisible.name}`);
+        await clearStorageAndReload(page);
+
+        // Initial check
+        const initialVisible = await page.locator('#review-due-btn').isVisible();
+        
+        // Interaction check: select library then deselect
+        await page.selectOption('#library-select', { index: 1 });
+        const selectedVisible = await page.locator('#review-due-btn').isVisible();
+        
+        await page.selectOption('#library-select', ''); // Deselect
+        const deselectedVisible = await page.locator('#review-due-btn').isVisible();
+
+        const passed = initialVisible && selectedVisible && deselectedVisible;
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review button persistent (initial: ${initialVisible}, selected: ${selectedVisible}, deselected: ${deselectedVisible})\n`);
+
+        results.push({ test: TESTS.srsButtonAlwaysVisible.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsButtonAlwaysVisible.name, passed: false, error: error.message });
+    }
+
+    // Test 5: Review Flow with List Preview
+    try {
+        console.log(`📋 Test ${TESTS.srsReviewFlow.id}: ${TESTS.srsReviewFlow.name}`);
+        await clearStorageAndReload(page);
+
+        // Scenario 1: No SRS data (should show notice on setup)
+        await page.click('#review-due-btn');
+        const noticeVisible = await page.locator('#setup-notice:not(.hidden)').isVisible();
+        const noticeText = await page.locator('#setup-notice').textContent();
+        console.log(`   ✓ No SRS notice on setup: "${noticeText}"`);
+
+        // Scenario 2: With words (preview list)
+        await seedSrsDue(page, 2);
+        await page.click('#review-due-btn');
+        
+        // Should show review-list-view
+        await page.waitForSelector('#review-list-view:not(.hidden)');
+        const subtitle = await page.locator('#review-list-subtitle').textContent();
+        // Wait for items to be rendered in the container
+        const container = page.locator('#review-words-container');
+        await page.waitForSelector('.review-word-item');
+        const wordItems = await container.locator('.review-word-item').count();
+        console.log(`   ✓ Review List preview shown: "${subtitle}" (${wordItems} words)`);
+
+        // Click Start Review
+        await page.click('#start-review-action-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+        
+        await finishQuiz(page, true);
+
+        await page.waitForSelector('#results-view:not(.hidden)');
+        await page.click('#final-restart-btn');
+        await page.waitForSelector('#setup-view:not(.hidden)');
+
+        const passed = wordItems === 2 && subtitle.includes('2 words');
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review list and quiz start verified\n`);
+
+        results.push({ test: TESTS.srsReviewFlow.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsReviewFlow.name, passed: false, error: error.message });
+    }
+
+    // Test 6: SRS Memory Curve Updates State
+    try {
+        console.log(`📋 Test ${TESTS.srsCurveUpdate.id}: ${TESTS.srsCurveUpdate.name}`);
+        await clearStorageAndReload(page);
+
+        const data = await seedSrsDue(page, 1);
+
+        await page.click('#review-due-btn');
+        await page.waitForSelector('#review-list-view:not(.hidden)');
+        
+        // Start from the list view
+        await page.click('#start-review-action-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+
+        // Use finishQuiz to properly complete the session
+        await finishQuiz(page, true);
+
+        await page.waitForSelector('#results-view:not(.hidden)');
+
+        const srsEntry = await page.evaluate(({ data }) => {
+            const raw = localStorage.getItem('wordmaster-srs-v1');
+            const parsed = raw ? JSON.parse(raw) : {};
+            const key = `${data.book}|${data.chapter}|${data.words[0]}`;
+            return parsed[key];
+        }, { data });
+
+        const passed = srsEntry &&
+            srsEntry.reps === 2 &&
+            srsEntry.intervalDays === 6 &&
+            Math.abs(srsEntry.ease - 2.6) < 0.0001;
+
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: SRS state updated (reps: ${srsEntry?.reps}, interval: ${srsEntry?.intervalDays}, ease: ${srsEntry?.ease})\n`);
+
+        results.push({ test: TESTS.srsCurveUpdate.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsCurveUpdate.name, passed: false, error: error.message });
     }
 
     // Summary
