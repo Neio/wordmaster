@@ -347,7 +347,7 @@ class WordMaster {
                 const wordObj = this.wordMap.get(key);
                 if (!wordObj) return null;
                 const [book, chapter] = key.split('|');
-                return { item: wordObj, entry, book, chapter };
+                return { ...wordObj, entry, book, chapter };
             })
             .filter(mapped => mapped && filterFn(mapped.entry, now))
             .sort((a, b) => a.entry.nextDue - b.entry.nextDue);
@@ -356,7 +356,7 @@ class WordMaster {
             list = list.slice(0, limit);
         }
 
-        return list.map(({ item, entry, book, chapter }) => ({ ...item, entry, book, chapter }));
+        return list;
     }
 
     getGlobalSrsDue() {
@@ -490,6 +490,7 @@ class WordMaster {
             subtitle.classList.add('status-success');
         }
 
+        const fragment = document.createDocumentFragment();
         this.words.forEach(item => {
             const div = document.createElement('div');
             div.className = 'review-word-item';
@@ -525,8 +526,9 @@ class WordMaster {
 
             div.appendChild(wordInfo);
             div.appendChild(dueSpan);
-            container.appendChild(div);
+            fragment.appendChild(div);
         });
+        container.appendChild(fragment);
     }
 
     updatePlaceholder() {
