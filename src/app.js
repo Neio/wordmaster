@@ -2,6 +2,9 @@ import { wordlyLibrary } from './data/library.js?v=202603130002';
 import { verifySpelling, isMeaningCorrect } from './utils/VerificationLogic.js?v=202603130002';
 import { computeNextSrs, makeSrsKey, seedMastered } from './utils/SrsScheduler.js?v=202603130002';
 
+const MANUAL_BOOK = 'Custom';
+const MANUAL_CHAPTER = 'Manual';
+
 class WordMaster {
     constructor() {
         this.words = [];
@@ -324,11 +327,20 @@ class WordMaster {
         this.saveSrsData();
     }
 
-    ensureSrsEntry(word, book, chapter) {
+    ensureSrsEntry(word, book, chapter, wordObj = null) {
         const key = makeSrsKey(book, chapter, word);
         if (this.srsData[key]) return;
         const seeded = seedMastered([{ word, book, chapter }], Date.now());
         this.srsData[key] = seeded[key];
+
+        if (wordObj && book === MANUAL_BOOK) {
+            this.srsData[key].customData = {
+                meaning: wordObj.meaning,
+                definition: wordObj.definition,
+                root: wordObj.root
+            };
+        }
+
         this.saveSrsData();
     }
 
@@ -344,7 +356,11 @@ class WordMaster {
         const now = Date.now();
         let list = Object.entries(this.srsData)
             .map(([key, entry]) => {
-                const wordObj = this.wordMap.get(key);
+                let wordObj = this.wordMap.get(key);
+                if (!wordObj && entry.customData) {
+                    const [book, chapter, word] = key.split('|');
+                    wordObj = { word, ...entry.customData };
+                }
                 if (!wordObj) return null;
                 const [book, chapter] = key.split('|');
                 return { ...wordObj, entry, book, chapter };
@@ -692,8 +708,8 @@ class WordMaster {
 
     handleCheck() {
         const current = this.words[this.currentIndex];
-        const book = current.book || this.currentBook;
-        const chapter = current.chapter || this.currentChapter;
+        const book = current.book || this.currentBook || MANUAL_BOOK;
+        const chapter = current.chapter || this.currentChapter || MANUAL_CHAPTER;
 
         if (this.state === 'QUIZ') {
             // Block submission if spelling field is empty
@@ -732,7 +748,7 @@ class WordMaster {
                     if (this.quizSource === 'SRS') {
                         this.updateSrsOnAnswer(current.word, book, chapter, true);
                     } else {
-                        this.ensureSrsEntry(current.word, book, chapter);
+                        this.ensureSrsEntry(current.word, book, chapter, current);
                     }
                 }
                 // Remove from incorrect list (if present)

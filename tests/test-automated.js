@@ -40,6 +40,11 @@ const TESTS = {
         id: '7.3',
         name: 'SRS Memory Curve Updates State',
         description: 'Correct answer should advance reps, interval, and ease'
+    },
+    srsManualList: {
+        id: '7.4',
+        name: 'Manual List SRS Integration',
+        description: 'Words from manual paste should be included in SRS'
     }
 };
 
@@ -391,6 +396,50 @@ async function runTests() {
     } catch (error) {
         console.error(`   ❌ ERROR: ${error.message}\n`);
         results.push({ test: TESTS.srsCurveUpdate.name, passed: false, error: error.message });
+    }
+
+    // Test 7: Manual List SRS Integration
+    try {
+        console.log(`📋 Test ${TESTS.srsManualList.id}: ${TESTS.srsManualList.name}`);
+        await clearStorageAndReload(page);
+
+        // Paste a custom list
+        await page.fill('#word-paste', 'manualword: custom definition');
+        await page.click('#start-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+
+        // Answer it correctly using finishQuiz helper
+        await finishQuiz(page, true);
+        await page.waitForSelector('#results-view:not(.hidden)');
+
+        // Go back to setup
+        await page.click('#final-restart-btn');
+        await page.waitForSelector('#setup-view:not(.hidden)');
+
+        // Verify SRS entry exists with customData
+        const srsEntry = await page.evaluate(() => {
+            const raw = localStorage.getItem('wordmaster-srs-v1');
+            const parsed = raw ? JSON.parse(raw) : {};
+            return parsed['Custom|Manual|manualword'];
+        });
+
+        const hasCustomData = srsEntry && srsEntry.customData && srsEntry.customData.meaning === 'custom definition';
+        console.log(`   ✓ SRS entry for manual word: ${JSON.stringify(srsEntry)}`);
+
+        // Check Review List
+        await page.click('#review-due-btn');
+        await page.waitForSelector('#review-list-view:not(.hidden)');
+        
+        const listText = await page.locator('#review-words-container').textContent();
+        const subtitle = await page.locator('#review-list-subtitle').textContent();
+        
+        const passed = hasCustomData && listText.includes('manualword') && listText.includes('Custom - Manual');
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Manual word present in Review List (found: ${listText.trim()})\n`);
+
+        results.push({ test: TESTS.srsManualList.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsManualList.name, passed: false, error: error.message });
     }
 
     // Summary
