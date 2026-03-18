@@ -385,7 +385,7 @@ async function runTests() {
                 const quizVisible = await page.locator('#quiz-view').isVisible();
                 const textareaValue = await page.locator('#word-paste').inputValue();
                 
-                const passed = quizVisible === false && textareaValue.includes('\n');
+                const passed = quizVisible === false && textareaValue === 'word1: def1\nword2: def2';
                 console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Enter key in textarea adding newline (Quiz visible: ${quizVisible})\n`);
                 results.push({ test: config.name, passed });
             }
