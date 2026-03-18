@@ -199,6 +199,9 @@ class WordMaster {
         document.addEventListener('keydown', (e) => {
             if (this.state === 'SETUP') {
                 if (e.key === 'Enter' && !this.btns.start.disabled) {
+                    // Don't start quiz if focus is in the manual word list textarea
+                    if (document.activeElement === this.inputs.paste) return;
+                    
                     this.startQuiz();
                 }
                 return;
