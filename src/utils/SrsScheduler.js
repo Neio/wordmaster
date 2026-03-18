@@ -9,6 +9,7 @@ export const computeNextSrs = (state, quality, nowMs) => {
     const prevReps = Number.isFinite(prev.reps) ? prev.reps : 0;
     const prevInterval = Number.isFinite(prev.intervalDays) ? prev.intervalDays : 0;
     const prevEase = Number.isFinite(prev.ease) ? prev.ease : 2.5;
+    const lastReviewed = prev.lastReviewed || (nowMs - DAY_MS); // Fallback to 1 day ago
 
     const q = Math.max(0, Math.min(5, quality));
     const ease = clampEase(
@@ -28,7 +29,17 @@ export const computeNextSrs = (state, quality, nowMs) => {
         } else if (reps === 2) {
             intervalDays = 6;
         } else {
-            intervalDays = Math.round(prevInterval * prevEase);
+            // Standard SM-2 for on-time/late reviews
+            const standardInterval = Math.round(prevInterval * prevEase);
+            
+            if (nowMs < (prev.nextDue || 0)) {
+                // Early Review Logic:
+                // New interval is proportional to elapsed time, but at least previous interval
+                const elapsedDays = Math.max(0, (nowMs - lastReviewed) / DAY_MS);
+                intervalDays = Math.max(prevInterval, Math.round(elapsedDays * prevEase));
+            } else {
+                intervalDays = standardInterval;
+            }
         }
     }
 

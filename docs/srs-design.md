@@ -36,6 +36,14 @@ Interval update:
 
 `nextDue = now + intervalDays * 86400000`
 
+### Early Reviews
+If a word is reviewed **before** its `nextDue` date, the interval growth is adjusted to prevent unearned exponential jumps:
+- **Incorrect (q < 3)**: Standard penalty (reset to 1 day).
+- **Correct (q >= 3)**:
+  - `elapsedDays = (now - lastReviewed) / 86400000`
+  - `intervalDays = max(prevInterval, round(elapsedDays * prevEase))`
+  - This ensures the interval never shrinks and only grows proportionally to how much time actually passed.
+
 ## Seeding from Mastered
 Existing `wordmaster-mastered` words are seeded once into SRS:
 - `reps = 1`
