@@ -437,10 +437,10 @@ button:active {
 .review-words-container {
   max-height: 350px;
   overflow-y: auto;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg);
   border-radius: 1rem;
   padding: 0.5rem;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border);
 }
 
 .review-word-item {
@@ -448,7 +448,7 @@ button:active {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--border);
 }
 
 .review-word-item:last-child {
@@ -460,9 +460,23 @@ button:active {
   color: var(--text);
 }
 
+.review-word-info {
+  display: flex;
+  flex-direction: column;
+}
+
 .review-word-context {
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.review-word-due {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
 }
 
 

@@ -168,6 +168,18 @@ async function runTests() {
         return data;
     }
 
+    async function seedIncorrectWords(page) {
+        await clearStorageAndReload(page);
+        await page.selectOption('#library-select', { index: 1 });
+        await page.click('#start-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+        console.log('   Seeding incorrect words...');
+        await finishQuiz(page, false);
+        await page.waitForSelector('#results-view:not(.hidden)');
+        await page.click('#final-restart-btn');
+        await page.waitForSelector('#setup-view:not(.hidden)');
+    }
+
     for (const [testKey, config] of selectedTests) {
         try {
             console.log(`📋 Test ${config.id}: ${config.name}`);
@@ -194,15 +206,7 @@ async function runTests() {
                 results.push({ test: config.name, passed });
 
             } else if (testKey === 'reviewButtonPersistence') {
-                await clearStorageAndReload(page);
-                await page.selectOption('#library-select', { index: 1 });
-                await page.click('#start-btn');
-                await page.waitForSelector('#quiz-view:not(.hidden)');
-                console.log('   Running through quiz (failing all)...');
-                await finishQuiz(page, false);
-                await page.waitForSelector('#results-view:not(.hidden)');
-                await page.click('#final-restart-btn');
-                await page.waitForSelector('#setup-view:not(.hidden)');
+                await seedIncorrectWords(page);
                 await page.waitForSelector('#review-btn');
                 const buttonVisible = await page.locator('#review-btn').isVisible();
                 const passed = buttonVisible;
@@ -210,17 +214,7 @@ async function runTests() {
                 results.push({ test: config.name, passed });
 
             } else if (testKey === 'incorrectWordRemoval') {
-                // Dependency: needs incorrect words. For isolation, we'll seed them if results is empty
-                if (results.length === 0 || !results.find(r => r.test === TESTS.reviewButtonPersistence.name && r.passed)) {
-                    await clearStorageAndReload(page);
-                    await page.selectOption('#library-select', { index: 1 });
-                    await page.click('#start-btn');
-                    await page.waitForSelector('#quiz-view:not(.hidden)');
-                    await finishQuiz(page, false);
-                    await page.waitForSelector('#results-view:not(.hidden)');
-                    await page.click('#final-restart-btn');
-                    await page.waitForSelector('#setup-view:not(.hidden)');
-                }
+                await seedIncorrectWords(page);
                 await page.click('#review-btn');
                 await page.waitForSelector('#quiz-view:not(.hidden)');
                 console.log('   Answering first review word correctly...');
