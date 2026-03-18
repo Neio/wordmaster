@@ -55,6 +55,11 @@ const TESTS = {
         id: '7.6',
         name: 'Early Review Protection',
         description: 'Reviewing before due date should limit interval growth'
+    },
+    pasteEnterBug: {
+        id: '8.1',
+        name: 'Paste Textarea Enter Key Bug',
+        description: 'Pressing Enter in the paste textarea should not start the quiz'
     }
 };
 
@@ -366,6 +371,22 @@ async function runTests() {
                 // elapsed (2) * ease (2.5) = 5. max(10, 5) = 10.
                 const passed = srsEntry && srsEntry.intervalDays === 10;
                 console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Early review protected (interval: ${srsEntry?.intervalDays})\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'pasteEnterBug') {
+                await clearStorageAndReload(page);
+                
+                await page.focus('#word-paste');
+                await page.keyboard.type('word1: def1');
+                await page.keyboard.press('Enter');
+                await page.keyboard.type('word2: def2');
+
+                // Check if we are still in SETUP state (textarea visible) or in QUIZ state
+                const quizVisible = await page.locator('#quiz-view').isVisible();
+                const textareaValue = await page.locator('#word-paste').inputValue();
+                
+                const passed = quizVisible === false && textareaValue.includes('\n');
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Enter key in textarea adding newline (Quiz visible: ${quizVisible})\n`);
                 results.push({ test: config.name, passed });
             }
         } catch (error) {

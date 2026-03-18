@@ -199,6 +199,9 @@ class WordMaster {
         document.addEventListener('keydown', (e) => {
             if (this.state === 'SETUP') {
                 if (e.key === 'Enter' && !this.btns.start.disabled) {
+                    // Don't start quiz if focus is in a textarea (e.g. manual word list)
+                    if (document.activeElement.tagName === 'TEXTAREA') return;
+                    
                     this.startQuiz();
                 }
                 return;
