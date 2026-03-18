@@ -348,7 +348,14 @@ class WordMaster {
         const key = makeSrsKey(book, chapter, word);
         const current = this.srsData[key];
         const quality = isCorrect ? 5 : 2;
-        this.srsData[key] = computeNextSrs(current, quality, Date.now());
+        const nextState = computeNextSrs(current, quality, Date.now());
+        
+        // Preserve customData for manual words
+        if (current && current.customData) {
+            nextState.customData = current.customData;
+        }
+        
+        this.srsData[key] = nextState;
         this.saveSrsData();
     }
 

@@ -45,6 +45,11 @@ const TESTS = {
         id: '7.4',
         name: 'Manual List SRS Integration',
         description: 'Words from manual paste should be included in SRS'
+    },
+    srsManualPersistence: {
+        id: '7.5',
+        name: 'Manual Word Persistence After Review',
+        description: 'Custom words should remain in SRS with metadata after a review session'
     }
 };
 
@@ -440,6 +445,54 @@ async function runTests() {
     } catch (error) {
         console.error(`   ❌ ERROR: ${error.message}\n`);
         results.push({ test: TESTS.srsManualList.name, passed: false, error: error.message });
+    }
+
+    // Test 8: Manual Word Persistence After Review
+    try {
+        console.log(`📋 Test ${TESTS.srsManualPersistence.id}: ${TESTS.srsManualPersistence.name}`);
+        await clearStorageAndReload(page);
+
+        // 1. Seed a manual word as due
+        await page.evaluate(() => {
+            const now = Date.now();
+            const srs = {
+                'Custom|Manual|persistent': {
+                    reps: 1,
+                    intervalDays: 1,
+                    ease: 2.5,
+                    lastReviewed: now - 86400000,
+                    nextDue: now - 1000,
+                    customData: { meaning: 'should stay' }
+                }
+            };
+            localStorage.setItem('wordmaster-srs-v1', JSON.stringify(srs));
+            localStorage.setItem('wordmaster-srs-seeded', '1');
+        });
+        await page.reload();
+
+        // 2. Perform the review
+        await page.click('#review-due-btn');
+        await page.waitForSelector('#review-list-view:not(.hidden)');
+        await page.click('#start-review-action-btn');
+        await page.waitForSelector('#quiz-view:not(.hidden)');
+        
+        await finishQuiz(page, true);
+        await page.waitForSelector('#results-view:not(.hidden)');
+
+        // 3. Verify entry still has customData
+        const srsEntry = await page.evaluate(() => {
+            const raw = localStorage.getItem('wordmaster-srs-v1');
+            const parsed = raw ? JSON.parse(raw) : {};
+            return parsed['Custom|Manual|persistent'];
+        });
+
+        const passed = srsEntry && srsEntry.reps === 2 && srsEntry.customData && srsEntry.customData.meaning === 'should stay';
+        console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Custom data preserved after review (reps: ${srsEntry?.reps}, hasData: ${!!srsEntry?.customData})\n`);
+
+        results.push({ test: TESTS.srsManualPersistence.name, passed });
+    } catch (error) {
+        console.error(`   ❌ ERROR: ${error.message}\n`);
+        results.push({ test: TESTS.srsManualPersistence.name, passed: false, error: error.message });
     }
 
     // Summary
