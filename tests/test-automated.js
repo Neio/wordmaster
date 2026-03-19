@@ -60,6 +60,36 @@ const TESTS = {
         id: '8.1',
         name: 'Paste Textarea Enter Key Bug',
         description: 'Pressing Enter in the paste textarea should not start the quiz'
+    },
+    customWordlistReTest: {
+        id: '9.1',
+        name: 'Custom Word List Re-test',
+        description: 'Verify that "Review Incorrect" button shows and works for custom word lists'
+    },
+    customListPersistence: {
+        id: '9.2',
+        name: 'Custom Word List Persistence',
+        description: 'Verify that the custom paste list is NOT cleared after starting or resetting'
+    },
+    customListEnterAfterReset: {
+        id: '9.3',
+        name: 'Custom List Enter Key After Reset',
+        description: 'Verify that Enter key in textarea after a reset does not trigger quiz start'
+    },
+    srsCustomWordReview: {
+        id: '9.4',
+        name: 'SRS Custom Word Review List',
+        description: 'Verify that custom words appear in the SRS Review List when due'
+    },
+    srsBackwardCompatibility: {
+        id: '9.5',
+        name: 'SRS Backward Compatibility Migration',
+        description: 'Verify that old "null|null|word" SRS keys are migrated to "Custom|Manual|word"'
+    },
+    srsDataResilience: {
+        id: '9.6',
+        name: 'SRS Data Resilience',
+        description: 'Verify that custom words appear even if customData metadata is missing'
     }
 };
 
@@ -387,6 +417,204 @@ async function runTests() {
                 
                 const passed = quizVisible === false && textareaValue === 'word1: def1\nword2: def2';
                 console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Enter key in textarea adding newline (Quiz visible: ${quizVisible})\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'customWordlistReTest') {
+                await clearStorageAndReload(page);
+                
+                // 1. Paste custom words
+                await page.fill('#word-paste', 'apple: a fruit\nbanana: another fruit');
+                await page.click('#start-btn');
+                await page.waitForSelector('#quiz-view:not(.hidden)');
+
+                // 2. Process first word (make it incorrect)
+                const word1 = await page.evaluate(() => window.app.words[window.app.currentIndex].word);
+                await page.fill('#spelling-input', 'wrongspelling');
+                await page.click('#check-btn');
+                await page.waitForSelector('#next-btn:not(.hidden)');
+                await page.click('#next-btn');
+
+                // 3. Process second word (make it correct)
+                const word2 = await page.evaluate(() => window.app.words[window.app.currentIndex].word);
+                await page.fill('#spelling-input', word2);
+                await page.click('#check-btn');
+                await page.waitForSelector('#next-btn:not(.hidden)');
+                await page.click('#next-btn');
+
+                // 4. Wait for results and go back to setup
+                await page.waitForSelector('#results-view:not(.hidden)');
+                await page.click('#final-restart-btn');
+                await page.waitForSelector('#setup-view:not(.hidden)');
+
+                // 5. Verify "Review Incorrect" button is visible and shows correct count
+                const reviewBtn = page.locator('#review-btn');
+                const isVisible = await reviewBtn.isVisible();
+                const btnText = await reviewBtn.textContent();
+                const hasCorrectCount = btnText.includes('Review Incorrect (1)');
+
+                // 6. Start review and verify the failed word is there
+                await reviewBtn.click();
+                await page.waitForSelector('#quiz-view:not(.hidden)');
+                const reviewWordCount = await page.evaluate(() => window.app.words.length);
+                const reviewWord = await page.evaluate(() => window.app.words[0].word);
+                const reviewWordDef = await page.evaluate(() => window.app.words[0].meaning);
+
+                // The failed word should be word1
+                const passed = isVisible && hasCorrectCount && reviewWordCount === 1 && reviewWord === word1 && (reviewWordDef === 'a fruit' || reviewWordDef === 'another fruit');
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Custom word re-test flow works as expected\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'customListPersistence') {
+                await clearStorageAndReload(page);
+                
+                const testText = 'persistword1: def1\npersistword2: def2';
+                await page.fill('#word-paste', testText);
+                
+                // 1. Start and immediately restart from quiz view
+                await page.click('#start-btn');
+                await page.waitForSelector('#quiz-view:not(.hidden)');
+                await page.click('#restart-btn');
+                await page.waitForSelector('#setup-view:not(.hidden)');
+                const afterRestartValue = await page.locator('#word-paste').inputValue();
+                
+                // 2. Start and finish to results view, then restart
+                await page.click('#start-btn');
+                await page.waitForSelector('#quiz-view:not(.hidden)');
+                await finishQuiz(page, true);
+                await page.waitForSelector('#results-view:not(.hidden)');
+                await page.click('#final-restart-btn');
+                await page.waitForSelector('#setup-view:not(.hidden)');
+                const afterFinalRestartValue = await page.locator('#word-paste').inputValue();
+
+                const passed = afterRestartValue === testText && afterFinalRestartValue === testText;
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Custom list persisted after restarts\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'customListEnterAfterReset') {
+                await clearStorageAndReload(page);
+                
+                // 1. Start a quiz and finish it
+                await page.fill('#word-paste', 'word1: def1\nword2: def2');
+                await page.click('#start-btn');
+                await page.waitForSelector('#quiz-view:not(.hidden)');
+                await finishQuiz(page, true);
+                await page.waitForSelector('#results-view:not(.hidden)');
+                
+                // 2. Go back to setup via final restart
+                await page.click('#final-restart-btn');
+                await page.waitForSelector('#setup-view:not(.hidden)');
+                
+                // 3. Focus textarea and press Enter
+                await page.focus('#word-paste');
+                await page.keyboard.press('Enter');
+                await page.keyboard.type('word3: def3');
+                
+                // 4. Verify we are STILL in setup and textarea has 3 lines
+                const quizVisible = await page.locator('#quiz-view').isVisible();
+                const textareaValue = await page.locator('#word-paste').inputValue();
+                
+                const passed = quizVisible === false && textareaValue.includes('word3: def3');
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Enter in textarea after reset adding newline (Quiz visible: ${quizVisible})\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'srsCustomWordReview') {
+                await clearStorageAndReload(page);
+                
+                // 1. Inject a due custom word
+                await page.evaluate(() => {
+                    const now = Date.now();
+                    const srsData = {
+                        'Custom|Manual|srs-manual-due': {
+                            reps: 1, intervalDays: 1, ease: 2.5,
+                            lastReviewed: now - 86400000 * 2, 
+                            nextDue: now - 86400000, 
+                            customData: { meaning: 'manual due meaning' }
+                        }
+                    };
+                    localStorage.setItem('wordmaster-srs-v1', JSON.stringify(srsData));
+                    localStorage.setItem('wordmaster-srs-seeded', '1');
+                });
+                
+                await page.reload();
+                await page.waitForSelector('#setup-view:not(.hidden)');
+
+                // 2. Click "Review" button
+                await page.click('#review-due-btn');
+                await page.waitForSelector('#review-list-view:not(.hidden)');
+
+                // 3. Verify it appears in the list
+                const containerText = await page.locator('#review-words-container').textContent();
+                const passed = containerText.includes('srs-manual-due') && containerText.includes('Custom - Manual');
+                
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Custom word present in SRS Review List\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'srsBackwardCompatibility') {
+                await clearStorageAndReload(page);
+                
+                // 1. Inject an "old style" SRS key (null|null|word)
+                await page.evaluate(() => {
+                    const now = Date.now();
+                    const srsData = {
+                        'null|null|old-style-key': {
+                            reps: 2, intervalDays: 6, ease: 2.5,
+                            lastReviewed: now - 86400000 * 10, 
+                            nextDue: now - 86400000, 
+                            customData: { meaning: 'old style meaning' }
+                        }
+                    };
+                    localStorage.setItem('wordmaster-srs-v1', JSON.stringify(srsData));
+                    localStorage.setItem('wordmaster-srs-seeded', '1');
+                });
+                
+                await page.reload();
+                await page.waitForSelector('#setup-view:not(.hidden)');
+
+                // 2. Check the Review List
+                await page.click('#review-due-btn');
+                await page.waitForSelector('#review-list-view:not(.hidden)');
+
+                const containerText = await page.locator('#review-words-container').textContent();
+                const hasWord = containerText.includes('old-style-key');
+                
+                // 3. Verify it was renamed in localStorage
+                const srsData = await page.evaluate(() => JSON.parse(localStorage.getItem('wordmaster-srs-v1')));
+                const hasNewKey = !!srsData['Custom|Manual|old-style-key'];
+                const hasOldKey = !!srsData['null|null|old-style-key'];
+
+                const passed = hasWord && hasNewKey && !hasOldKey;
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Old SRS keys migrated correctly (Has new key: ${hasNewKey})\n`);
+                results.push({ test: config.name, passed });
+
+            } else if (testKey === 'srsDataResilience') {
+                await clearStorageAndReload(page);
+                
+                // 1. Inject an SRS entry MISSING customData (like the user's example)
+                await page.evaluate(() => {
+                    const now = Date.now();
+                    const srsData = {
+                        'Custom|Manual|banana': {
+                            reps: 2, intervalDays: 6, ease: 2.6,
+                            lastReviewed: now - 86400000 * 5, 
+                            nextDue: now - 86400000 // Due
+                        }
+                    };
+                    localStorage.setItem('wordmaster-srs-v1', JSON.stringify(srsData));
+                    localStorage.setItem('wordmaster-srs-seeded', '1');
+                });
+                
+                await page.reload();
+                await page.waitForSelector('#setup-view:not(.hidden)');
+
+                // 2. Check the Review List
+                await page.click('#review-due-btn');
+                await page.waitForSelector('#review-list-view:not(.hidden)');
+
+                const containerText = await page.locator('#review-words-container').textContent();
+                const hasBanana = containerText.includes('banana');
+
+                const passed = hasBanana;
+                console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Word without customData still appears in Review List\n`);
                 results.push({ test: config.name, passed });
             }
         } catch (error) {

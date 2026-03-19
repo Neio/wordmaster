@@ -32,13 +32,18 @@ class WordMaster {
             try {
                 const parsed = JSON.parse(storedIncorrect);
                 if (Array.isArray(parsed)) {
-                    // Check if it's already in new format (array of objects)
-                    if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].word) {
-                        incorrectData = parsed; // New format
-                    } else {
-                        // Old format: array of strings, migrate to new format without book/chapter
-                        incorrectData = parsed.map(word => ({ word, book: null, chapter: null }));
-                    }
+                    incorrectData = parsed.map(item => {
+                        // If it's just a string, migrate to object
+                        if (typeof item === 'string') {
+                            return { word: item, book: MANUAL_BOOK, chapter: MANUAL_CHAPTER };
+                        }
+                        // If it's an object but missing book/chapter, set to manual
+                        return {
+                            ...item,
+                            book: item.book || MANUAL_BOOK,
+                            chapter: item.chapter || MANUAL_CHAPTER
+                        };
+                    });
                 }
             } catch (e) {
                 console.warn('Could not parse incorrect words, resetting:', e);
@@ -46,10 +51,11 @@ class WordMaster {
         }
 
         this.incorrectWords = incorrectData;
-        this.currentBook = null;
-        this.currentChapter = null;
+        this.currentBook = MANUAL_BOOK;
+        this.currentChapter = MANUAL_CHAPTER;
 
         this.srsData = this.loadSrsData();
+        this.saveSrsData(); // Persist any migrations
         this.seedSrsIfNeeded();
 
         this.updateMasteryUI();
@@ -236,11 +242,15 @@ class WordMaster {
             if (this.inputs.library.value) {
                 // Hide paste area when library is selected
                 this.inputs.paste.closest('.input-group').classList.add('hidden');
+                const [book, chapter] = this.inputs.library.value.split('|');
+                this.currentBook = book;
+                this.currentChapter = chapter;
                 this.updateReviewButtons(); // Update review button visibility & count
             } else {
                 // Show paste area when library is deselected
                 this.inputs.paste.closest('.input-group').classList.remove('hidden');
-                this.btns.startReview.classList.add('hidden'); // Hide review button when no book selected
+                this.currentBook = MANUAL_BOOK;
+                this.currentChapter = MANUAL_CHAPTER;
                 this.updateReviewButtons();
             }
         };
@@ -249,9 +259,11 @@ class WordMaster {
             if (this.inputs.paste.value.trim()) {
                 // Hide library when user types in paste area
                 this.inputs.library.closest('.input-group').classList.add('hidden');
+                this.updateReviewButtons();
             } else {
                 // Show library when paste area is empty
                 this.inputs.library.closest('.input-group').classList.remove('hidden');
+                this.updateReviewButtons();
             }
         };
 
@@ -297,7 +309,19 @@ class WordMaster {
         if (!raw) return {};
         try {
             const parsed = JSON.parse(raw);
-            return parsed && typeof parsed === 'object' ? parsed : {};
+            if (!parsed || typeof parsed !== 'object') return {};
+            
+            const migrated = {};
+            Object.entries(parsed).forEach(([key, entry]) => {
+                let newKey = key;
+                // Migrate old keys using "null|null|word" or "undefined|undefined|word"
+                if (key.startsWith('null|null|') || key.startsWith('undefined|undefined|')) {
+                    const word = key.split('|').pop();
+                    newKey = makeSrsKey(MANUAL_BOOK, MANUAL_CHAPTER, word);
+                }
+                migrated[newKey] = entry;
+            });
+            return migrated;
         } catch (e) {
             console.warn('Could not parse SRS data, resetting:', e);
             return {};
@@ -347,8 +371,14 @@ class WordMaster {
         this.saveSrsData();
     }
 
-    updateSrsOnAnswer(word, book, chapter, isCorrect) {
+    updateSrsOnAnswer(word, book, chapter, isCorrect, wordObj = null) {
         const key = makeSrsKey(book, chapter, word);
+        
+        // Ensure entry exists (critical for custom words metadata)
+        if (!this.srsData[key] && wordObj && book === MANUAL_BOOK) {
+            this.ensureSrsEntry(word, book, chapter, wordObj);
+        }
+
         const current = this.srsData[key];
         const quality = isCorrect ? 5 : 2;
         const nextState = computeNextSrs(current, quality, Date.now());
@@ -367,12 +397,15 @@ class WordMaster {
         let list = Object.entries(this.srsData)
             .map(([key, entry]) => {
                 let wordObj = this.wordMap.get(key);
-                if (!wordObj && entry.customData) {
-                    const [book, chapter, word] = key.split('|');
-                    wordObj = { word, ...entry.customData };
+                if (!wordObj) {
+                    const parts = key.split('|');
+                    const word = parts[parts.length - 1];
+                    // Fallback for custom words even if customData is missing
+                    wordObj = { word, ...(entry.customData || {}) };
                 }
-                if (!wordObj) return null;
-                const [book, chapter] = key.split('|');
+                const parts = key.split('|');
+                const book = parts[0];
+                const chapter = parts[1];
                 return { ...wordObj, entry, book, chapter };
             })
             .filter(mapped => mapped && filterFn(mapped.entry, now))
@@ -427,19 +460,20 @@ class WordMaster {
 
     updateReviewButtons() {
         const libVal = this.inputs.library.value;
+        let book = MANUAL_BOOK;
+        let chapter = MANUAL_CHAPTER;
 
         if (libVal) {
-            const [book, chapter] = libVal.split('|');
-            const count = this.getIncorrectCountForBook(book, chapter);
-            if (count === 0) {
-                this.btns.startReview.classList.add('hidden');
-            } else {
-                this.btns.startReview.classList.remove('hidden');
-                const btnText = this.btns.startReview.querySelector('.btn-text');
-                if (btnText) btnText.textContent = `Review Incorrect (${count})`;
-            }
-        } else {
+            [book, chapter] = libVal.split('|');
+        }
+
+        const count = this.getIncorrectCountForBook(book, chapter);
+        if (count === 0) {
             this.btns.startReview.classList.add('hidden');
+        } else {
+            this.btns.startReview.classList.remove('hidden');
+            const btnText = this.btns.startReview.querySelector('.btn-text');
+            if (btnText) btnText.textContent = `Review Incorrect (${count})`;
         }
 
         this.btns.startReviewDue.classList.remove('hidden');
@@ -450,25 +484,31 @@ class WordMaster {
     startReviewQuiz() {
         const libVal = this.inputs.library.value;
         this.clearSetupNotice();
-        if (!libVal) {
-            this.showSetupNotice("Please select a library item first.");
-            return;
+
+        let book, chapter;
+        if (libVal) {
+            [book, chapter] = libVal.split('|');
+        } else {
+            book = MANUAL_BOOK;
+            chapter = MANUAL_CHAPTER;
         }
 
-        const [book, chapter] = libVal.split('|');
-        const wrongWordSet = new Set(
-            this.incorrectWords
-                .filter(item => item.book === book && item.chapter === chapter)
-                .map(item => item.word)
-        );
+        const wrongWords = this.incorrectWords
+            .filter(item => item.book === book && item.chapter === chapter);
 
-        if (wrongWordSet.size === 0) {
+        if (wrongWords.length === 0) {
             this.showSetupNotice("Great job! No incorrect words for this lesson.", false);
             return;
         }
 
-        // Load full word objects from library
-        const fullWords = wordlyLibrary[book][chapter].filter(w => wrongWordSet.has(w.word));
+        // Load full word objects (either from library or from stored custom data)
+        let fullWords;
+        if (libVal) {
+            const wrongWordSet = new Set(wrongWords.map(item => item.word));
+            fullWords = wordlyLibrary[book][chapter].filter(w => wrongWordSet.has(w.word));
+        } else {
+            fullWords = wrongWords;
+        }
 
         this.words = [...fullWords].sort(() => Math.random() - 0.5);
         this.currentBook = book;
@@ -589,8 +629,8 @@ class WordMaster {
             this.currentChapter = chapter;
             selectedList = wordlyLibrary[book][chapter];
         } else {
-            this.currentBook = null; // Paste mode
-            this.currentChapter = null;
+            this.currentBook = MANUAL_BOOK; // Paste mode
+            this.currentChapter = MANUAL_CHAPTER;
             selectedList = this.parsePaste(this.inputs.paste.value);
         }
 
@@ -732,6 +772,12 @@ class WordMaster {
             }
 
             const isSpellingCorrect = verifySpelling(this.inputs.spelling.value, current.word);
+            let isMeanCorrect = true;
+            if (this.quizMode === 'both') {
+                isMeanCorrect = isMeaningCorrect(this.inputs.meaning.value, current.meaning || current.definition);
+            }
+
+            const isCorrect = isSpellingCorrect && isMeanCorrect;
 
             // Format feedback based on quiz mode
             let correctMsg, incorrectMsg;
@@ -751,31 +797,35 @@ class WordMaster {
                 incorrectMsg = `Incorrect. The word was "${current.word}": ${displayDef}${rootInfo} `;
             }
 
-            if (isSpellingCorrect) {
+            if (isCorrect) {
                 this.score.correct++;
                 this.masteredWords.add(current.word);
                 if (book && chapter) {
                     if (this.quizSource === 'SRS') {
-                        this.updateSrsOnAnswer(current.word, book, chapter, true);
+                        this.updateSrsOnAnswer(current.word, book, chapter, true, current);
                     } else {
                         this.ensureSrsEntry(current.word, book, chapter, current);
                     }
                 }
                 // Remove from incorrect list (if present)
-                this.incorrectWords = this.incorrectWords.filter(item => item.word !== current.word);
+                this.incorrectWords = this.incorrectWords.filter(item => 
+                    !(item.word === current.word && item.book === book && item.chapter === chapter)
+                );
                 this.showFeedback(true, correctMsg);
             } else {
                 this.score.incorrect++;
                 if (book && chapter && this.quizSource === 'SRS') {
-                    this.updateSrsOnAnswer(current.word, book, chapter, false);
+                    this.updateSrsOnAnswer(current.word, book, chapter, false, current);
                 }
 
                 // Remove old entry if exists, then add new one with metadata
-                this.incorrectWords = this.incorrectWords.filter(item => item.word !== current.word);
+                this.incorrectWords = this.incorrectWords.filter(item => 
+                    !(item.word === current.word && item.book === book && item.chapter === chapter)
+                );
 
                 if (book && chapter) {
                     this.incorrectWords.push({
-                        word: current.word,
+                        ...current,
                         book,
                         chapter
                     });
@@ -815,6 +865,7 @@ class WordMaster {
     }
 
     showResults() {
+        this.state = 'RESULTS';
         this.showView('results');
         const percentage = Math.round((this.score.correct / this.words.length) * 100);
         this.displays.score.textContent = `${percentage}%`;
@@ -826,8 +877,8 @@ class WordMaster {
     }
 
     reset() {
+        this.state = 'SETUP';
         this.showView('setup');
-        this.inputs.paste.value = '';
         this.clearSetupNotice();
         // User requested to keep the selected library item
         // this.inputs.library.selectedIndex = 0;
