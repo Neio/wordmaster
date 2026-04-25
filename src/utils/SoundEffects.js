@@ -1,6 +1,6 @@
 /**
- * Utility for generating synthesized sound effects using the Web Audio API.
- * This avoids the need for external audio files.
+ * Utility for playing high-quality recorded sound effects with a 
+ * synthesized Web Audio API fallback.
  */
 class SoundEffects {
     constructor() {
@@ -21,7 +21,10 @@ class SoundEffects {
             } catch (e) {
                 console.warn('Web Audio API not supported in this browser:', e);
             }
-        } else if (this.ctx.state === 'suspended') {
+        }
+        
+        // Ensure context is resumed if suspended (common in many browsers)
+        if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume();
         }
     }
@@ -32,6 +35,7 @@ class SoundEffects {
     playSuccess() {
         this.successAudio.currentTime = 0;
         this.successAudio.play().catch(e => {
+            if (e.name === 'AbortError') return; // Ignore aborts from rapid playback
             console.warn('Audio file playback failed, falling back to synthesis:', e);
             this._playSynthesizedSuccess();
         });
@@ -43,6 +47,7 @@ class SoundEffects {
     playFailure() {
         this.failureAudio.currentTime = 0;
         this.failureAudio.play().catch(e => {
+            if (e.name === 'AbortError') return; // Ignore aborts from rapid playback
             console.warn('Audio file playback failed, falling back to synthesis:', e);
             this._playSynthesizedFailure();
         });
