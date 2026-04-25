@@ -1,4 +1,8 @@
 {
+  "type": "module",
+  "scripts": {
+    "test": "node tests/unit-tests.js"
+  },
   "dependencies": {
     "jsdom": "^28.1.0",
     "playwright": "^1.58.1"
