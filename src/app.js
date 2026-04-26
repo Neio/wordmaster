@@ -1,6 +1,7 @@
 import { wordlyLibrary } from './data/library.js?v=202603130002';
 import { verifySpelling, isMeaningCorrect } from './utils/VerificationLogic.js?v=202603130002';
 import { computeNextSrs, makeSrsKey, seedMastered } from './utils/SrsScheduler.js?v=202603130002';
+import { soundEffects } from './utils/SoundEffects.js?v=202603130002';
 
 const MANUAL_BOOK = 'Custom';
 const MANUAL_CHAPTER = 'Manual';
@@ -854,6 +855,13 @@ class WordMaster {
         f.innerHTML = message;
         f.className = `feedback ${isSuccess ? 'status-correct' : 'status-incorrect'} `;
         f.classList.remove('hidden');
+
+        // Play sound effects
+        if (isSuccess) {
+            soundEffects.playSuccess();
+        } else {
+            soundEffects.playFailure();
+        }
     }
 
     updateUI() {
