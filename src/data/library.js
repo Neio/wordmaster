@@ -735,8 +735,34 @@ const purposefulDesignGrade3 = {
   ]
 };
 
+const purposefulDesignGrade4 = {
+  "Chapter 1": [
+    { "word": "atlas", "meaning": "A book of maps or charts", "definition": "A bound collection of maps often including illustrations, informative tables, or textual matter.", "root": "Short a" },
+    { "word": "travel", "meaning": "To go from one place to another", "definition": "To journey from place to place, to explore.", "root": "Short a" },
+    { "word": "elastic", "meaning": "Able to resume its normal shape after being stretched", "definition": "Capable of stretching and resuming its original shape or size.", "root": "Short a" },
+    { "word": "having", "meaning": "Possessing or holding something", "definition": "Present participle of have; possessing or experiencing.", "root": "Short a" },
+    { "word": "satisfy", "meaning": "To meet the expectations, needs, or desires of someone", "definition": "To fulfill or gratify to the full, as a desire or appetite; to content.", "root": "Short a" },
+    { "word": "candle", "meaning": "A cylinder of wax with a wick that provides light", "definition": "A cylinder of wax or other substance with an embedded wick, burned to provide light.", "root": "Short a" },
+    { "word": "captain", "meaning": "The person in command of a ship, aircraft, or team", "definition": "A person of rank or authority over others, especially the commander of a vessel or sports team.", "root": "Short a" },
+    { "word": "pasture", "meaning": "Land covered with grass suitable for grazing animals", "definition": "Land covered with grass and other low plants suitable for grazing animals.", "root": "Short a" },
+    { "word": "manage", "meaning": "To be in charge of or succeed in doing something", "definition": "To direct or conduct affairs; to handle or control successfully.", "root": "Short a" },
+    { "word": "Canada", "meaning": "A large country in northern North America", "definition": "A country in North America, situated north of the United States.", "root": "Proper Noun / Short a" },
+    { "word": "example", "meaning": "A thing characteristic of its kind or illustrating a rule", "definition": "A representative form or pattern, or something that is typical of a group.", "root": "Short a" },
+    { "word": "fantastic", "meaning": "Extraordinarily good; wonderful", "definition": "Extraordinary; wonderful; existing in or produced by the imagination.", "root": "Short a" },
+    { "word": "scramble", "meaning": "To move quickly using hands and feet, or to mix together", "definition": "To climb or move quickly using one's hands and feet, or to mix together haphazardly.", "root": "Short a" },
+    { "word": "hamburger", "meaning": "A round patty of ground beef inside a sliced bun", "definition": "A sandwich consisting of one or more cooked patties of ground meat inside a sliced bun.", "root": "Short a" },
+    { "word": "enough", "meaning": "As much or as many as required; sufficient", "definition": "Sufficient to meet a need or satisfy a requirement.", "root": "High Freq" },
+    { "word": "because", "meaning": "For the reason that; since", "definition": "For the reason that; on account of the fact that.", "root": "High Freq" },
+    { "word": "absent", "meaning": "Not present in a place; away", "definition": "Not present; away from a place where one is expected or supposed to be.", "root": "Challenge Word" },
+    { "word": "absolute", "meaning": "Complete, total, and not limited", "definition": "Free from imperfection; complete; perfect; unrestricted.", "root": "Challenge Word" },
+    { "word": "access", "meaning": "The ability or right to enter or use something", "definition": "A way of entering or approaching a place; permission or liberty to use something.", "root": "Challenge Word" },
+    { "word": "accurate", "meaning": "Correct in all details; exact", "definition": "Correct and exact; free from error.", "root": "Challenge Word" }
+  ]
+};
+
 export const wordlyLibrary = {
   "Wordly Wise - Book 6": wordlyBook6,
   "Classical Roots E": bookE,
-  "Purposeful Design Grade 3": purposefulDesignGrade3
+  "Purposeful Design Grade 3": purposefulDesignGrade3,
+  "Purposeful Design Spelling Plus Grade 4": purposefulDesignGrade4
 };

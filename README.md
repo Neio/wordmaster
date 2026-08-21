@@ -9,6 +9,7 @@
 - **📚 Integrated Library**: Comes pre-loaded with:
   - *Vocabulary from Classical Roots - Book E* (Lessons 1-16)
   - *Purposeful Design Spelling Plus - Grade 3*
+  - *Purposeful Design Spelling Plus - Grade 4*
   - *Wordly Wise* (Sample Lessons)
 - **🧠 Spaced Repetition (SRS)**: Optimized review mode using the SM-2 algorithm. "Review Due" button automatically identifies words ready for reinforcement.
 - **⚡️ One-Shot Verification**: Fast-paced quiz flow. Type your spelling and verify instantly.
