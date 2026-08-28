@@ -757,12 +757,34 @@ const purposefulDesignGrade4 = {
     { "word": "absolute", "meaning": "Complete, total, and not limited", "definition": "Free from imperfection; complete; perfect; unrestricted.", "root": "Challenge Word" },
     { "word": "access", "meaning": "The ability or right to enter or use something", "definition": "A way of entering or approaching a place; permission or liberty to use something.", "root": "Challenge Word" },
     { "word": "accurate", "meaning": "Correct in all details; exact", "definition": "Correct and exact; free from error.", "root": "Challenge Word" }
+  ],
+  "Chapter 2": [
+    { "word": "raise", "meaning": "To lift or elevate to a higher position", "definition": "To cause to rise; to lift up; to elevate.", "root": "Long a" },
+    { "word": "radio", "meaning": "The transmission and reception of electromagnetic signals of radio frequency", "definition": "A receiver of radio signals; or, the wireless transmission of signals.", "root": "Long a" },
+    { "word": "eighth", "meaning": "Next after seventh; being number eight in a countable series", "definition": "The ordinal number corresponding to the number eight.", "root": "Long a" },
+    { "word": "Savior", "meaning": "A person who saves, rescues, or delivers", "definition": "A person who rescues another from harm or danger; (Christianity) Jesus Christ.", "root": "Long a" },
+    { "word": "survey", "meaning": "To look carefully and thoroughly at or examine", "definition": "To inspect, or take a view of; to view with attention.", "root": "Long a" },
+    { "word": "weight", "meaning": "A body's relative mass or the quantity of matter contained by it", "definition": "The force on an object due to gravity; relative mass.", "root": "Long a" },
+    { "word": "nature", "meaning": "The phenomena of the physical world including plants, animals, and landscape", "definition": "The phenomena of the physical world collectively, including plants, animals, the landscape, and other features and products of the earth.", "root": "Long a" },
+    { "word": "faithful", "meaning": "Remaining loyal and steadfast", "definition": "Firm in adherence to promises or in observance of duty; loyal.", "root": "Long a" },
+    { "word": "contain", "meaning": "Have or hold someone or something within", "definition": "To hold inside; to enclose, hold, or include within limits.", "root": "Long a" },
+    { "word": "disobey", "meaning": "Fail to obey rules or someone in authority", "definition": "To fail or refuse to obey; to break rules or commands.", "root": "Long a" },
+    { "word": "volcano", "meaning": "A mountain or hill having a crater through which lava and rock fragments are expelled", "definition": "A rupture in the crust of a planetary-mass object that allows hot lava, volcanic ash, and gases to escape from a magma chamber below the surface.", "root": "Long a" },
+    { "word": "straight", "meaning": "Extending or moving uniformly in one direction without a curve or bend", "definition": "Extending continuously in the same direction without curving; direct.", "root": "Long a" },
+    { "word": "conveyed", "meaning": "Transported or carried to a place; communicated", "definition": "Past tense of convey; transported, communicated, or made known.", "root": "Long a" },
+    { "word": "neighborhood", "meaning": "A district, especially one forming a community within a town or city", "definition": "The surroundings of a place; a district or community within a larger town or city.", "root": "Long a" },
+    { "word": "usually", "meaning": "Under normal conditions; generally", "definition": "Most of the time; commonly; under normal conditions.", "root": "High Freq" },
+    { "word": "remember", "meaning": "Have in or be able to bring to one's mind an awareness of someone or something", "definition": "To recall from memory; to retain in one's memory.", "root": "High Freq" },
+    { "word": "repaid", "meaning": "Paid back money or rewarded someone for a service", "definition": "Past tense of repay; paid back or refunded.", "root": "Challenge Word" },
+    { "word": "reweigh", "meaning": "To weigh something again", "definition": "To determine the weight of something again.", "root": "Challenge Word" },
+    { "word": "unable", "meaning": "Lacking the skill, means, or opportunity to do something", "definition": "Not able; lacking the power, means, capacity, or opportunity.", "root": "Challenge Word" },
+    { "word": "unclaimed", "meaning": "Not claimed or called for by an owner or beneficiary", "definition": "Not claimed, asserted, or collected.", "root": "Challenge Word" }
   ]
 };
 
 export const wordlyLibrary = {
   "Wordly Wise - Book 6": wordlyBook6,
   "Classical Roots E": bookE,
-  "Purposeful Design Grade 3": purposefulDesignGrade3,
+  "Purposeful Design Spelling Plus Grade 3": purposefulDesignGrade3,
   "Purposeful Design Spelling Plus Grade 4": purposefulDesignGrade4
 };
