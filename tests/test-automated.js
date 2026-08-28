@@ -167,7 +167,8 @@ async function runTests() {
     }
 
     async function seedSrsDue(page, dueCount = 2) {
-        await page.selectOption('#library-select', { index: 1 });
+        await page.selectOption('#book-select', { index: 1 });
+        await page.selectOption('#chapter-select', { index: 1 });
         await page.click('#start-btn');
         await page.waitForSelector('#quiz-view:not(.hidden)');
 
@@ -198,14 +199,16 @@ async function runTests() {
         await page.waitForSelector('#setup-view:not(.hidden)');
         await page.reload();
         await page.waitForSelector('#setup-view:not(.hidden)');
-        await page.selectOption('#library-select', { index: 1 });
+        await page.selectOption('#book-select', { index: 1 });
+        await page.selectOption('#chapter-select', { index: 1 });
 
         return data;
     }
 
     async function seedIncorrectWords(page) {
         await clearStorageAndReload(page);
-        await page.selectOption('#library-select', { index: 1 });
+        await page.selectOption('#book-select', { index: 1 });
+        await page.selectOption('#chapter-select', { index: 1 });
         await page.click('#start-btn');
         await page.waitForSelector('#quiz-view:not(.hidden)');
         console.log('   Seeding incorrect words...');
@@ -271,9 +274,10 @@ async function runTests() {
             } else if (testKey === 'srsButtonAlwaysVisible') {
                 await clearStorageAndReload(page);
                 const initialVisible = await page.locator('#review-due-btn').isVisible();
-                await page.selectOption('#library-select', { index: 1 });
+                await page.selectOption('#book-select', { index: 1 });
+                await page.selectOption('#chapter-select', { index: 1 });
                 const selectedVisible = await page.locator('#review-due-btn').isVisible();
-                await page.selectOption('#library-select', '');
+                await page.selectOption('#book-select', '');
                 const deselectedVisible = await page.locator('#review-due-btn').isVisible();
                 const passed = initialVisible && selectedVisible && deselectedVisible;
                 console.log(`   ${passed ? '✅ PASS' : '❌ FAIL'}: Review button persistent\n`);

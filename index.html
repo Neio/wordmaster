@@ -27,11 +27,19 @@
                 <div id="total-mastered" style="font-size: 1.5rem; font-weight: 700; color: var(--success);">0</div>
             </div>
 
-            <div class="input-group">
-                <label>Select from Library</label>
-                <select id="library-select">
-                    <option value="">Select a Book / Lesson...</option>
-                </select>
+            <div id="library-selection-group" class="library-grid">
+                <div class="input-group">
+                    <label for="book-select">Select Book</label>
+                    <select id="book-select">
+                        <option value="">Select a Book...</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="chapter-select">Select Chapter / Lesson</label>
+                    <select id="chapter-select" disabled>
+                        <option value="">Select a Chapter / Lesson...</option>
+                    </select>
+                </div>
             </div>
 
             <div id="quiz-mode-selection">

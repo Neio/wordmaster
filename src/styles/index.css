@@ -135,6 +135,24 @@ textarea:focus {
   border-color: var(--border);
 }
 
+.library-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .library-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 textarea {
   min-height: 120px;
   resize: vertical;

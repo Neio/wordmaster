@@ -73,13 +73,15 @@ class WordMaster {
         };
 
         this.inputs = {
-            library: document.getElementById('library-select'),
+            book: document.getElementById('book-select'),
+            chapter: document.getElementById('chapter-select'),
             paste: document.getElementById('word-paste'),
             spelling: document.getElementById('spelling-input'),
             meaning: document.getElementById('meaning-input'),
             meaningGroup: document.getElementById('meaning-group'),
             voiceSelect: document.getElementById('voice-select')
         };
+        this.libraryGroup = document.getElementById('library-selection-group');
 
         this.displays = {
             counter: document.getElementById('quiz-counter'),
@@ -166,19 +168,59 @@ class WordMaster {
 
     initLibrary() {
         this.wordMap = new Map();
+        if (this.inputs.book) {
+            this.inputs.book.innerHTML = '<option value="">Select a Book...</option>';
+            for (const book in wordlyLibrary) {
+                const opt = document.createElement('option');
+                opt.value = book;
+                opt.textContent = book;
+                this.inputs.book.appendChild(opt);
+            }
+        }
+
         for (const book in wordlyLibrary) {
             for (const chapter in wordlyLibrary[book]) {
-                const opt = document.createElement('option');
-                opt.value = `${book}|${chapter}`;
-                opt.textContent = `${book} - ${chapter} `;
-                this.inputs.library.appendChild(opt);
-
                 for (const item of wordlyLibrary[book][chapter]) {
                     const key = makeSrsKey(book, chapter, item.word);
                     this.wordMap.set(key, item);
                 }
             }
         }
+    }
+
+    populateChapters(book) {
+        if (!this.inputs.chapter) return;
+        this.inputs.chapter.innerHTML = '';
+        if (!book || !wordlyLibrary[book]) {
+            this.inputs.chapter.disabled = true;
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Select a Chapter / Lesson...';
+            this.inputs.chapter.appendChild(opt);
+            return;
+        }
+
+        this.inputs.chapter.disabled = false;
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = 'Select a Chapter / Lesson...';
+        this.inputs.chapter.appendChild(defaultOpt);
+
+        for (const chapter in wordlyLibrary[book]) {
+            const opt = document.createElement('option');
+            opt.value = chapter;
+            opt.textContent = chapter;
+            this.inputs.chapter.appendChild(opt);
+        }
+    }
+
+    getSelectedLibrary() {
+        const book = this.inputs.book ? this.inputs.book.value : '';
+        const chapter = this.inputs.chapter ? this.inputs.chapter.value : '';
+        if (book && chapter) {
+            return { book, chapter };
+        }
+        return null;
     }
 
     attachEvents() {
@@ -238,32 +280,29 @@ class WordMaster {
             }
         });
 
-        // Make library and paste mutually exclusive (hide instead of clear)
-        this.inputs.library.onchange = () => {
-            if (this.inputs.library.value) {
-                // Hide paste area when library is selected
-                this.inputs.paste.closest('.input-group').classList.add('hidden');
-                const [book, chapter] = this.inputs.library.value.split('|');
-                this.currentBook = book;
-                this.currentChapter = chapter;
-                this.updateReviewButtons(); // Update review button visibility & count
-            } else {
-                // Show paste area when library is deselected
-                this.inputs.paste.closest('.input-group').classList.remove('hidden');
-                this.currentBook = MANUAL_BOOK;
-                this.currentChapter = MANUAL_CHAPTER;
-                this.updateReviewButtons();
-            }
-        };
+        // Two-layer library selection
+        if (this.inputs.book) {
+            this.inputs.book.onchange = () => {
+                const book = this.inputs.book.value;
+                this.populateChapters(book);
+                this.handleLibraryChange();
+            };
+        }
+
+        if (this.inputs.chapter) {
+            this.inputs.chapter.onchange = () => {
+                this.handleLibraryChange();
+            };
+        }
 
         this.inputs.paste.oninput = () => {
             if (this.inputs.paste.value.trim()) {
                 // Hide library when user types in paste area
-                this.inputs.library.closest('.input-group').classList.add('hidden');
+                if (this.libraryGroup) this.libraryGroup.classList.add('hidden');
                 this.updateReviewButtons();
             } else {
                 // Show library when paste area is empty
-                this.inputs.library.closest('.input-group').classList.remove('hidden');
+                if (this.libraryGroup) this.libraryGroup.classList.remove('hidden');
                 this.updateReviewButtons();
             }
         };
@@ -453,6 +492,28 @@ class WordMaster {
         window.speechSynthesis.speak(utterance);
     }
 
+    handleLibraryChange() {
+        const book = this.inputs.book ? this.inputs.book.value : '';
+        const chapter = this.inputs.chapter ? this.inputs.chapter.value : '';
+
+        if (book) {
+            // Hide paste area when a book is chosen
+            this.inputs.paste.closest('.input-group').classList.add('hidden');
+        } else {
+            // Show paste area when no book is selected
+            this.inputs.paste.closest('.input-group').classList.remove('hidden');
+        }
+
+        if (book && chapter) {
+            this.currentBook = book;
+            this.currentChapter = chapter;
+        } else {
+            this.currentBook = MANUAL_BOOK;
+            this.currentChapter = MANUAL_CHAPTER;
+        }
+        this.updateReviewButtons();
+    }
+
     getIncorrectCountForBook(book, chapter) {
         return this.incorrectWords.filter(item =>
             item.book === book && item.chapter === chapter
@@ -460,13 +521,9 @@ class WordMaster {
     }
 
     updateReviewButtons() {
-        const libVal = this.inputs.library.value;
-        let book = MANUAL_BOOK;
-        let chapter = MANUAL_CHAPTER;
-
-        if (libVal) {
-            [book, chapter] = libVal.split('|');
-        }
+        const selected = this.getSelectedLibrary();
+        const book = selected ? selected.book : MANUAL_BOOK;
+        const chapter = selected ? selected.chapter : MANUAL_CHAPTER;
 
         const count = this.getIncorrectCountForBook(book, chapter);
         if (count === 0) {
@@ -483,16 +540,11 @@ class WordMaster {
     }
 
     startReviewQuiz() {
-        const libVal = this.inputs.library.value;
+        const selected = this.getSelectedLibrary();
         this.clearSetupNotice();
 
-        let book, chapter;
-        if (libVal) {
-            [book, chapter] = libVal.split('|');
-        } else {
-            book = MANUAL_BOOK;
-            chapter = MANUAL_CHAPTER;
-        }
+        const book = selected ? selected.book : MANUAL_BOOK;
+        const chapter = selected ? selected.chapter : MANUAL_CHAPTER;
 
         const wrongWords = this.incorrectWords
             .filter(item => item.book === book && item.chapter === chapter);
@@ -504,7 +556,7 @@ class WordMaster {
 
         // Load full word objects (either from library or from stored custom data)
         let fullWords;
-        if (libVal) {
+        if (selected) {
             const wrongWordSet = new Set(wrongWords.map(item => item.word));
             fullWords = wordlyLibrary[book][chapter].filter(w => wrongWordSet.has(w.word));
         } else {
@@ -617,18 +669,21 @@ class WordMaster {
 
     startQuiz() {
         let selectedList = [];
-        const libVal = this.inputs.library.value;
+        const book = this.inputs.book ? this.inputs.book.value : '';
+        const chapter = this.inputs.chapter ? this.inputs.chapter.value : '';
         this.clearSetupNotice();
 
         // Capture Quiz Mode
         const modeEl = document.querySelector('input[name="quiz-mode"]:checked');
         this.quizMode = modeEl ? modeEl.value : 'spelling-only';
 
-        if (libVal) {
-            const [book, chapter] = libVal.split('|');
+        if (book && chapter) {
             this.currentBook = book;
             this.currentChapter = chapter;
             selectedList = wordlyLibrary[book][chapter];
+        } else if (book && !chapter) {
+            this.showSetupNotice("Please select a Chapter / Lesson first!");
+            return;
         } else {
             this.currentBook = MANUAL_BOOK; // Paste mode
             this.currentChapter = MANUAL_CHAPTER;
