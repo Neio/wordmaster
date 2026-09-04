@@ -779,6 +779,28 @@ const purposefulDesignGrade4 = {
     { "word": "reweigh", "meaning": "To weigh something again", "definition": "To determine the weight of something again.", "root": "Challenge Word" },
     { "word": "unable", "meaning": "Lacking the skill, means, or opportunity to do something", "definition": "Not able; lacking the power, means, capacity, or opportunity.", "root": "Challenge Word" },
     { "word": "unclaimed", "meaning": "Not claimed or called for by an owner or beneficiary", "definition": "Not claimed, asserted, or collected.", "root": "Challenge Word" }
+  ],
+  "Chapter 3": [
+    { "word": "hotel", "meaning": "An establishment providing lodging, meals, and other services for travelers", "definition": "A commercial establishment providing lodging, meals, and other guest services.", "root": "Short e" },
+    { "word": "selfish", "meaning": "Lacking consideration for others; concerned chiefly with personal profit or pleasure", "definition": "Concerned excessively or exclusively with oneself; seeking one's own advantage without regard for others.", "root": "Short e" },
+    { "word": "meant", "meaning": "Intended to do or say something; signified", "definition": "Past tense and past participle of mean; intended to express, indicate, or accomplish something.", "root": "Short e" },
+    { "word": "breath", "meaning": "The air taken into and expelled from the lungs", "definition": "The air inhaled and exhaled in the process of respiration.", "root": "Short e" },
+    { "word": "instead", "meaning": "As an alternative or substitute", "definition": "In place of something or someone; as a substitute.", "root": "Short e" },
+    { "word": "several", "meaning": "More than two but not many", "definition": "Being more than two but not very many in number.", "root": "Short e" },
+    { "word": "leather", "meaning": "A material made from the skin of an animal by tanning", "definition": "A material prepared by tanning the hide or skin of animals, used for clothing, shoes, and bags.", "root": "Short e" },
+    { "word": "Mexico", "meaning": "A country in southern North America", "definition": "A country in southern North America, bordered by the United States to the north and Belize and Guatemala to the south.", "root": "Proper Noun / Short e" },
+    { "word": "protect", "meaning": "To keep safe from harm, injury, or loss", "definition": "To guard from harm, damage, or attack; to shield.", "root": "Short e" },
+    { "word": "already", "meaning": "Before or by now or the time in question", "definition": "Prior to a specified or implied time; beforehand.", "root": "Short e" },
+    { "word": "connect", "meaning": "To join, link, or fasten together", "definition": "To join or link together physically or logically; to associate.", "root": "Short e" },
+    { "word": "pleasant", "meaning": "Giving a sense of happy satisfaction or enjoyment", "definition": "Giving pleasure, agreeable, or satisfying to the senses or mind.", "root": "Short e" },
+    { "word": "seventeen", "meaning": "The number equivalent to the sum of seven plus ten; 17", "definition": "The cardinal number occurring after sixteen and before eighteen; 17.", "root": "Short e" },
+    { "word": "everybody", "meaning": "Every person; everyone", "definition": "All people; every individual in a group or generally.", "root": "Short e" },
+    { "word": "music", "meaning": "Vocal or instrumental sounds combined to produce beauty of form and harmony", "definition": "An art form of arranging sounds in time through elements of pitch, melody, rhythm, and harmony.", "root": "High Freq" },
+    { "word": "during", "meaning": "Throughout the course or duration of a period of time", "definition": "Throughout the continuation or course of; at some point in the time of.", "root": "High Freq" },
+    { "word": "envelope", "meaning": "A flat paper container, typically with a gummed flap, for a letter or document", "definition": "A flat paper container, usually rectangular, used to enclose a letter or document.", "root": "Vocabulary Word" },
+    { "word": "entrance", "meaning": "An opening, such as a door, passage, or gate, that allows access to a place", "definition": "An opening, door, or gate by which a place can be entered.", "root": "Vocabulary Word" },
+    { "word": "expedition", "meaning": "A journey or voyage undertaken by a group with a particular purpose", "definition": "A journey organized for a particular purpose, such as exploration, scientific research, or war.", "root": "Vocabulary Word" },
+    { "word": "exclamation", "meaning": "A sudden cry or remark, especially expressing surprise, anger, or pain", "definition": "A sudden, sharp utterance or cry expressing strong emotion, surprise, or protest.", "root": "Vocabulary Word" }
   ]
 };
 
