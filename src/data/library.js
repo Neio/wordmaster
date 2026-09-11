@@ -801,6 +801,28 @@ const purposefulDesignGrade4 = {
     { "word": "entrance", "meaning": "An opening, such as a door, passage, or gate, that allows access to a place", "definition": "An opening, door, or gate by which a place can be entered.", "root": "Vocabulary Word" },
     { "word": "expedition", "meaning": "A journey or voyage undertaken by a group with a particular purpose", "definition": "A journey organized for a particular purpose, such as exploration, scientific research, or war.", "root": "Vocabulary Word" },
     { "word": "exclamation", "meaning": "A sudden cry or remark, especially expressing surprise, anger, or pain", "definition": "A sudden, sharp utterance or cry expressing strong emotion, surprise, or protest.", "root": "Vocabulary Word" }
+  ],
+  "Chapter 4": [
+    { "word": "idea", "meaning": "A thought, plan, or suggestion about what to do", "definition": "A thought, concept, or mental impression formed in the mind.", "root": "Long e" },
+    { "word": "niece", "meaning": "A daughter of one's brother or sister", "definition": "A daughter of one's brother, sister, brother-in-law, or sister-in-law.", "root": "Long e" },
+    { "word": "belief", "meaning": "An acceptance that something is true or exists; trust or faith", "definition": "A feeling or conviction of the truth, reality, or trust in something or someone.", "root": "Long e" },
+    { "word": "either", "meaning": "One or the other of two people or things", "definition": "One or the other of two alternatives; each of two.", "root": "Long e" },
+    { "word": "secret", "meaning": "Not known or seen or not meant to be known or seen by others", "definition": "Something kept hidden from knowledge, view, or notice of others.", "root": "Long e" },
+    { "word": "money", "meaning": "Coins and banknotes used to pay for goods and services", "definition": "A current medium of exchange in the form of coins and banknotes.", "root": "Long e" },
+    { "word": "reason", "meaning": "A cause, explanation, or justification for an action or event", "definition": "An explanation or justification of an act, event, or belief.", "root": "Long e" },
+    { "word": "receive", "meaning": "To be given, presented with, or paid something", "definition": "To get, accept, or take something that is given, sent, or offered.", "root": "Long e" },
+    { "word": "chimney", "meaning": "A vertical pipe or channel that carries smoke away from a fire", "definition": "A vertical structure that incorporates one or more flues to carry smoke and gases from a fire.", "root": "Long e" },
+    { "word": "breathe", "meaning": "To take air into the lungs and expel it", "definition": "To inhale and exhale air in respiration.", "root": "Long e" },
+    { "word": "enemies", "meaning": "People or groups actively opposed or hostile to someone or something", "definition": "Plural of enemy; persons or groups that are actively hostile or opposed to others.", "root": "Long e" },
+    { "word": "beaches", "meaning": "Sandy or pebbly shores by the ocean or a lake", "definition": "Plural of beach; sandy or pebbly shores along the edge of a sea or lake.", "root": "Long e" },
+    { "word": "seasonal", "meaning": "Relating to or characteristic of a particular season of the year", "definition": "Relating to, depending on, or characteristic of a particular season.", "root": "Long e" },
+    { "word": "keyboard", "meaning": "A set of keys on a computer, typewriter, or musical instrument", "definition": "A set of keys operated with the fingers for entering data or playing a musical instrument.", "root": "Long e" },
+    { "word": "southern", "meaning": "Situated in, facing toward, or coming from the south", "definition": "Located in, moving toward, or characteristic of the south.", "root": "High Freq" },
+    { "word": "northern", "meaning": "Situated in, facing toward, or coming from the north", "definition": "Located in, moving toward, or characteristic of the north.", "root": "High Freq" },
+    { "word": "decode", "meaning": "To convert a coded message into intelligible language", "definition": "To translate coded characters or symbols into ordinary readable language.", "root": "Vocabulary Word" },
+    { "word": "dehydrate", "meaning": "To lose a large amount of water; to dry out", "definition": "To remove water or moisture from; or to lose bodily fluids excessively.", "root": "Vocabulary Word" },
+    { "word": "preseason", "meaning": "The period of time before the start of a regular sports season", "definition": "A period of preparation and exhibition matches taking place prior to a regular sports season.", "root": "Vocabulary Word" },
+    { "word": "prearrange", "meaning": "To arrange or agree upon something in advance", "definition": "To plan, prepare, or settle beforehand or in advance.", "root": "Vocabulary Word" }
   ]
 };
 
