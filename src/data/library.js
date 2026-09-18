@@ -823,6 +823,28 @@ const purposefulDesignGrade4 = {
     { "word": "dehydrate", "meaning": "To lose a large amount of water; to dry out", "definition": "To remove water or moisture from; or to lose bodily fluids excessively.", "root": "Vocabulary Word" },
     { "word": "preseason", "meaning": "The period of time before the start of a regular sports season", "definition": "A period of preparation and exhibition matches taking place prior to a regular sports season.", "root": "Vocabulary Word" },
     { "word": "prearrange", "meaning": "To arrange or agree upon something in advance", "definition": "To plan, prepare, or settle beforehand or in advance.", "root": "Vocabulary Word" }
+  ],
+  "Chapter 5": [
+    { "word": "living", "meaning": "Alive, or having life; or the manner in which one conducts life", "definition": "Alive, not dead; or the state or condition of being alive.", "root": "Short i" },
+    { "word": "stitch", "meaning": "A loop of thread used in sewing, knitting, or surgery", "definition": "A single complete movement of a threaded needle in sewing or surgical suturing.", "root": "Short i" },
+    { "word": "picnic", "meaning": "An outing or meal eaten outdoors, especially in the countryside", "definition": "An excursion or outing in which the participants eat an outdoor meal together.", "root": "Short i" },
+    { "word": "pillow", "meaning": "A soft cushion used to support the head, especially in bed", "definition": "A cushion used to support the head, especially while sleeping.", "root": "Short i" },
+    { "word": "skillful", "meaning": "Having or showing the ability to do something well", "definition": "Possessing, showing, or requiring great skill, expertise, or proficiency.", "root": "Short i" },
+    { "word": "biscuit", "meaning": "A small, baked quick bread or a crisp, dry baked cookie", "definition": "A small, typically round cake of baked dough leavened with baking powder or soda.", "root": "Short i" },
+    { "word": "comics", "meaning": "Comic strips or periodicals containing sequences of comic art", "definition": "Publications or illustrated stories consisting of comic art and text panels.", "root": "Short i" },
+    { "word": "picture", "meaning": "A painting, drawing, or photograph of something or someone", "definition": "A visual representation of a person, object, or scene, as a painting, drawing, or photograph.", "root": "Short i" },
+    { "word": "sincere", "meaning": "Free from pretense or deceit; genuine and honest", "definition": "Free from hypocrisy, dishonesty, or deceit; genuine and real.", "root": "Short i" },
+    { "word": "difficult", "meaning": "Needing much effort or skill to do or understand; not easy", "definition": "Hard to understand, accomplish, or solve; requiring great effort or skill.", "root": "Short i" },
+    { "word": "hospitals", "meaning": "Institutions providing medical and surgical treatment for sick or injured people", "definition": "Plural of hospital; institutions where patients receive medical treatment and nursing care.", "root": "Short i" },
+    { "word": "fifteenth", "meaning": "Next after fourteenth; being number fifteen in a series", "definition": "The ordinal number corresponding to the number fifteen.", "root": "Short i" },
+    { "word": "sandwich", "meaning": "Two slices of bread with meat, cheese, or other filling between them", "definition": "An item of food consisting of two pieces of bread with meat, cheese, or other filling between them.", "root": "Short i" },
+    { "word": "whichever", "meaning": "Any one or which one of a group that you choose", "definition": "Any one or ones from a specified set; no matter which.", "root": "Short i" },
+    { "word": "products", "meaning": "Articles or substances that are manufactured or refined for sale", "definition": "Plural of product; items or commodities produced by labor, nature, or industry.", "root": "High Freq" },
+    { "word": "mountains", "meaning": "Large natural elevations of the earth's surface rising abruptly from the surrounding level", "definition": "Plural of mountain; large natural elevations of the earth's surface with steep sides and high peaks.", "root": "High Freq" },
+    { "word": "immature", "meaning": "Not fully grown or developed; childish", "definition": "Not fully developed in body, mind, or behavior; childish or youthful.", "root": "Vocabulary Word" },
+    { "word": "impossible", "meaning": "Not able to occur, exist, or be done", "definition": "Incapable of existing, happening, or being accomplished; extremely difficult.", "root": "Vocabulary Word" },
+    { "word": "inland", "meaning": "Situated in the interior of a country or region, away from the coast", "definition": "Pertaining to or situated in the interior parts of a country, away from the coast or borders.", "root": "Vocabulary Word" },
+    { "word": "invisible", "meaning": "Unable to be seen; not visible to the eye", "definition": "Incapable of being seen; not accessible to sight; hidden or concealed.", "root": "Vocabulary Word" }
   ]
 };
 
